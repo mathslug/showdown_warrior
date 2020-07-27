@@ -19,11 +19,13 @@ with open('./data/login.txt', 'rt') as f,\
     username, password = f.read().strip().splitlines()
 
 class ChallengeClient(showdown.Client):
+    async def on_connect(self):
+        await self.join('lobby')
 
     async def on_private_message(self, pm):
         if pm.recipient == self:
             await self.cancel_challenge()
-            await pm.author.challenge('', 'gen8randombattle')
+            await pm.author.challenge('', 'gen1randombattle')
 
     async def on_challenge_update(self, challenge_data):
         incoming = challenge_data.get('challengesFrom', {})
@@ -37,10 +39,10 @@ class ChallengeClient(showdown.Client):
         if room_obj.id.startswith('battle-'):
             await asyncio.sleep(3)
             await room_obj.say('Hi Jake. I don\'t know  how to do anything yet, so ... gg.')
-            await room_obj.forfeit()
+            await self.decide_action(room_obj)
             await room_obj.leave()
 
-    async def on_connect(self):
-        await self.join('lobby')
+    def decide_action(self, room_obj):
+        return(room_obj.forfeit())
 
 ChallengeClient(name=username, password=password).start()
