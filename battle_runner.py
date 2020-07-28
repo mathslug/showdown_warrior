@@ -3,7 +3,7 @@
 """
 An example client that challenges a player to 
 a random battle when PM'd, or accepts any
-random battle challenge. Mostly stolen from showdown.py examples
+random battle challenge. Largely stolen from showdown.py examples
 """
 import showdown
 import logging
@@ -52,12 +52,18 @@ class ChallengeClient(showdown.Client):
                 await room_obj.forfeit()
                 await room_obj.leave()
             else:
-                big_brain = Gen1Player()
-                first_move = big_brain.first_move('todo: add team')
+                self.big_brain = Gen1Player()
+                # todo: pass room_obj into big brain so it can just manipulate it directly
+                first_move = self.big_brain.first_move('todo: add team')
                 await self.interpret_big_brain(first_move, room_obj)
                 await asyncio.sleep(30)
                 await room_obj.forfeit()
                 await room_obj.leave()
+
+    async def on_receive(self, room_id, inp_type, params):
+        if room_id.startswith('battle-'):
+            if inp_type == 'turn' and params != ['1']:
+                next_move = self.big_brain.next_move('todo: add team', 'todo: figure out how to add opp action')
 
     def interpret_big_brain(self, brain_move, room):
         if 'a' == brain_move[0]:
