@@ -5,6 +5,7 @@ Class to run the gen1 pokemon battle.
 Mostly in a different file to make it easier to work on.
 """
 import pandas as pd
+import random
 
 class Gen1Player():
 	def __init__(self):
@@ -12,7 +13,7 @@ class Gen1Player():
 		self.opp_actions = []
 
 	def first_move(self, team):
-		my_action = 'a1'
+		my_action = random.choice(['a1','s2','a2','s3','a3','a4'])
 		self.self_actions.append(my_action)
 		return my_action
 

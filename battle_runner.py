@@ -52,16 +52,17 @@ class ChallengeClient(showdown.Client):
                 await room_obj.forfeit()
                 await room_obj.leave()
             else:
-                this_room = showdown.Battle(room_obj.id)
                 big_brain = Gen1Player()
                 first_move = big_brain.first_move('todo: add team')
-                await self.interpret_big_brain(first_move, this_room)
+                await self.interpret_big_brain(first_move, room_obj)
                 await asyncio.sleep(30)
                 await room_obj.forfeit()
                 await room_obj.leave()
 
     def interpret_big_brain(self, brain_move, room):
-        if 'a' in brain_move:
-            return room.move(1)
+        if 'a' == brain_move[0]:
+            return room.move(brain_move[1:])
+        elif 's' == brain_move[0]:
+            return room.switch(brain_move[1:])
 
 ChallengeClient(name=username, password=password).start()
