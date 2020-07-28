@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Class to run the gen1 pokemon battle.
+Class that does the decision-making to run the gen1 pokemon battle.
 Mostly in a different file to make it easier to work on.
 """
 import pandas as pd

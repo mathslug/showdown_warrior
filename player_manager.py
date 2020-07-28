@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-An example client that challenges a player to
-a random battle when PM'd, or accepts any
-random battle challenge. Largely stolen from showdown.py examples
+Challenges a player to a random battle when PM'd, or accepts any
+random battle challenge and runs the battles with other files
+in this repo. Partially stolen from showdown.py examples
 """
 import showdown
 import logging
@@ -62,6 +62,9 @@ class ChallengeClient(showdown.Client):
 
     async def on_receive(self, room_id, inp_type, params):
         if room_id.startswith('battle-'):
+            # will probably need to extract team and opp move data with
+            # another if statement like the one below and add them to
+            # the warrior as the come in, seperate from move-making.
             if inp_type == 'turn' and params != ['1']:
                 await self.warriors[room_id].next_move('todo: add team', 'todo: figure out how to add opp action')
 

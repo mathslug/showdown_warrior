@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Class to run the gen1 pokemon battle.
-Mostly in a different file to make it easier to work on.
 """
-import pandas as pd
-import random
 import showdown
 from thinker import Gen1Thinker
 
