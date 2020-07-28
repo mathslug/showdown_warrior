@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-An example client that challenges a player to 
+An example client that challenges a player to
 a random battle when PM'd, or accepts any
 random battle challenge. Largely stolen from showdown.py examples
 """
@@ -9,7 +9,7 @@ import showdown
 import logging
 import asyncio
 from pprint import pprint
-from player import Gen1Player
+from battle_manager import Gen1Knight
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,11 +23,13 @@ with open('./data/login.txt', 'rt') as f,\
 
 class ChallengeClient(showdown.Client):
     async def on_connect(self):
+        self.warriors = dict()
         await self.join('lobby')
 
     async def on_private_message(self, pm):
         if pm.recipient == self:
             await self.cancel_challenge()
+            await asyncio.sleep(1)
             await pm.author.challenge('', 'gen1randombattle')
 
     async def on_challenge_update(self, challenge_data):
@@ -52,10 +54,8 @@ class ChallengeClient(showdown.Client):
                 await room_obj.forfeit()
                 await room_obj.leave()
             else:
-                self.big_brain = Gen1Player()
-                # todo: pass room_obj into big brain so it can just manipulate it directly
-                first_move = self.big_brain.first_move('todo: add team')
-                await self.interpret_big_brain(first_move, room_obj)
+                self.warriors[room_obj.id] = Gen1Knight(room_obj)
+                await self.warriors[room_obj.id].first_move('todo: add team')
                 await asyncio.sleep(30)
                 await room_obj.forfeit()
                 await room_obj.leave()
@@ -63,12 +63,6 @@ class ChallengeClient(showdown.Client):
     async def on_receive(self, room_id, inp_type, params):
         if room_id.startswith('battle-'):
             if inp_type == 'turn' and params != ['1']:
-                next_move = self.big_brain.next_move('todo: add team', 'todo: figure out how to add opp action')
+                await self.warriors[room_id].next_move('todo: add team', 'todo: figure out how to add opp action')
 
-    def interpret_big_brain(self, brain_move, room):
-        if 'a' == brain_move[0]:
-            return room.move(brain_move[1:])
-        elif 's' == brain_move[0]:
-            return room.switch(brain_move[1:])
-
-ChallengeClient(name=username, password=password).start()
+ChallengeClient(name=username, password=password, strict_exceptions=True).start()
