@@ -9,13 +9,16 @@ import showdown
 import logging
 import asyncio
 from pprint import pprint
+from player import Gen1Player
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 with open('./data/login.txt', 'rt') as f,\
-     open('./data/mono-ghost.txt', 'rt') as team:
-    ghost_team = team.read()
+     open('./data/gen_1_team.txt', 'rt') as team1,\
+     open('./data/mono-ghost.txt', 'rt') as team2:
+    gen_1_team = team1.read()
+    ghost_team = team2.read()
     username, password = f.read().strip().splitlines()
 
 class ChallengeClient(showdown.Client):
@@ -32,17 +35,33 @@ class ChallengeClient(showdown.Client):
         for user, tier in incoming.items():
             if 'random' in tier:
                 await self.accept_challenge(user, 'null')
-            if 'gen7monotype' in tier:
+            elif 'gen1ou' in tier:
+                await self.accept_challenge(user, gen_1_team)
+            elif 'gen7monotype' in tier:
                 await self.accept_challenge(user, ghost_team)
+            else:
+                await self.reject_challenge(user)
 
     async def on_room_init(self, room_obj):
         if room_obj.id.startswith('battle-'):
-            await asyncio.sleep(3)
-            await room_obj.say('Hi Jake. I don\'t know  how to do anything yet, so ... gg.')
-            await self.decide_action(room_obj)
-            await room_obj.leave()
+            if not 'gen1randombattle' in room_obj.id:
+                await asyncio.sleep(3)
+                await room_obj.say('Actually, you know what?')
+                await asyncio.sleep(2)
+                await room_obj.say('I don\'t love this meta. Let\'s try a gen 1 random battle.')
+                await room_obj.forfeit()
+                await room_obj.leave()
+            else:
+                this_room = showdown.Battle(room_obj.id)
+                big_brain = Gen1Player()
+                first_move = big_brain.first_move('todo: add team')
+                await self.interpret_big_brain(first_move, this_room)
+                await asyncio.sleep(30)
+                await room_obj.forfeit()
+                await room_obj.leave()
 
-    def decide_action(self, room_obj):
-        return(room_obj.forfeit())
+    def interpret_big_brain(self, brain_move, room):
+        if 'a' in brain_move:
+            return room.move(1)
 
 ChallengeClient(name=username, password=password).start()
