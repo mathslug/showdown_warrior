@@ -54,18 +54,24 @@ class ChallengeClient(showdown.Client):
                 await room_obj.forfeit()
                 await room_obj.leave()
             else:
-                self.warriors[room_obj.id] = Gen1Knight(room_obj)
-                await self.warriors[room_obj.id].first_move('todo: add team')
-                await asyncio.sleep(30)
+                self.warriors[room_obj.id] = Gen1Knight(room_obj, self.name)
+                await asyncio.sleep(600)
+                await room_obj.say('I gotta run.')
                 await room_obj.forfeit()
-                await room_obj.leave()
 
     async def on_receive(self, room_id, inp_type, params):
         if room_id.startswith('battle-'):
-            # will probably need to extract team and opp move data with
-            # another if statement like the one below and add them to
-            # the warrior as the come in, seperate from move-making.
-            if inp_type == 'turn' and params != ['1']:
-                await self.warriors[room_id].next_move('todo: add team', 'todo: figure out how to add opp action')
+            print(inp_type)
+            print(params)
+            print('')
+            if inp_type == 'request' and params != [''] and not '{"wait":' in params[0]:
+                self.warriors[room_id].update_team(params)
+            if inp_type == 'switch' and 'p2' in params[0]:
+                self.warriors[room_id].update_opp(params)
+            if inp_type == 'turn' or (inp_type == 'faint' and 'p1' in params[0]) or inp_type == 'error':
+                await self.warriors[room_id].next_move(inp_type == 'faint' and 'p1' in params[0])
+            if inp_type == 'win':
+                await self.warriors[room_id].end_words(params)
+                await self.warriors[room_id].room_obj.leave()
 
 ChallengeClient(name=username, password=password, strict_exceptions=True).start()
