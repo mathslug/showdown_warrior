@@ -60,7 +60,7 @@ class ChallengeClient(showdown.Client):
                 await room_obj.forfeit()
 
     async def on_receive(self, room_id, inp_type, params):
-        if room_id.startswith('battle-'):
+        if room_id.startswith('battle-') and 'gen1randombattle' in room_id:
             print(inp_type)
             print(params)
             print('')
