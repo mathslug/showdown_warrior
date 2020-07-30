@@ -9,10 +9,19 @@ import showdown
 import asyncio
 from pprint import pprint
 from battle_manager import Gen1Knight
+from os import path
 
 class ChallengeClient(showdown.Client):
     async def on_connect(self):
         self.warriors = dict()
+        self.gen_1_team = ''
+        self.ghost_team = ''
+        if path.exists('./data/gen_1_team.txt'):
+            with open('./data/gen_1_team.txt', 'rt') as team1:
+                self.gen_1_team = team1.read()
+        if path.exists('./data/mono-ghost.txt'):
+            with open('./data/mono-ghost.txt', 'rt') as team2:
+                self.ghost_team = team2.read()
         await self.join('lobby')
 
     async def on_private_message(self, pm):
@@ -26,10 +35,10 @@ class ChallengeClient(showdown.Client):
         for user, tier in incoming.items():
             if 'random' in tier:
                 await self.accept_challenge(user, 'null')
-            elif 'gen1ou' in tier:
-                await self.accept_challenge(user, gen_1_team)
-            elif 'gen7monotype' in tier:
-                await self.accept_challenge(user, ghost_team)
+            elif 'gen1ou' in tier and self.gen_1_team:
+                await self.accept_challenge(user, self.gen_1_team)
+            elif 'gen7monotype' in tier and self.ghost_team:
+                await self.accept_challenge(user, self.ghost_team)
             else:
                 await self.reject_challenge(user)
 
