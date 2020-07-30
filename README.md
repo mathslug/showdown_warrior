@@ -5,7 +5,7 @@ author: mathslug
 
 ## setup
 
-* git clone this directory and cd into it
+* git clone this repository and cd into it
 
 * save showdown credentials in `./data/login.txt` as:
 
