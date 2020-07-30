@@ -7,7 +7,7 @@ author: mathslug
 
 * git clone this directory and cd into it
 
-* save showdown credntials in `./data/login.txt` as:
+* save showdown credentials in `./data/login.txt` as:
 
 ```
 username
