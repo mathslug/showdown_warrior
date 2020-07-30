@@ -14,23 +14,35 @@ class Gen1Thinker():
 		self.opp_active_mon = ''
 		self.opp_pokemon_list = []
 
-	def next_move(self, is_forced_switch):
-		move_pp_list = map(lambda move: not 'pp' in move.keys() or move['pp'] !=  0, self.active_moves_list)
-		usable_moves = list(compress(map(lambda move: move['id'], self.active_moves_list),move_pp_list))
+	def get_next_move(self, is_forced_switch):
+		usable_mons = self.__get_usable_mons()
+		usable_moves = self.__get_usable_moves()
+		will_switch = self.__get_will_switch(is_forced_switch, usable_mons)
+		if will_switch:
+			return will_switch, self.__get_next_mon(usable_mons)
+		else:
+			return will_switch, self.__get_next_attack(usable_moves)
 
-		switchable_mons_list = map(lambda mon: not 'fnt' in mon['condition'] and not mon['active'], self.pokemon_list)
-		usable_mons = list(compress(map(lambda mon: mon['ident'][4:], self.pokemon_list),switchable_mons_list))
+	def __get_usable_mons(self):
+		mons_switchable_list = map(lambda mon: not 'fnt' in mon['condition'] and not mon['active'], self.pokemon_list)
+		usable_mons = list(compress(map(lambda mon: mon['ident'][4:], self.pokemon_list), mons_switchable_list))
+		return usable_mons
 
+	def __get_usable_moves(self):
+		moves_selectable_list = map(lambda move: not 'pp' in move.keys() or move['pp'] !=  0, self.active_moves_list)
+		usable_moves = list(compress(map(lambda move: move['id'], self.active_moves_list), moves_selectable_list))
+		return usable_moves
+
+	def __get_will_switch(self, is_forced_switch, usable_mons):
 		if is_forced_switch:
-			do_switch = True
+			return True
 		elif not usable_mons:
-			do_switch = False
+			return False
 		else:
-			do_switch = random.choice([True, False, False, False, False, False, False])
+			return random.choice([True, False, False, False, False, False, False])
 
-		if do_switch:
-			my_selection = str(random.choice(usable_mons))
-		else:
-			my_selection = str(random.choice(usable_moves))
+	def __get_next_mon(self, usable_mons):
+		return str(random.choice(usable_mons))
 
-		return do_switch, my_selection
+	def __get_next_attack(self, usable_moves):
+		return str(random.choice(usable_moves))

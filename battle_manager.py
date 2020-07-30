@@ -17,22 +17,21 @@ class Gen1Knight():
         print(inp_type)
         print(params)
         print('')
+
         if inp_type == 'request' and params != [''] and not '{"wait":' in params[0]:
-            self.__update_team(params)
-            return asyncio.sleep(0)
+            params_dict = json.loads(params[0])
+            self.__update_team(params_dict)
+            return self.__next_move('forceSwitch' in params_dict.keys())
         elif inp_type == 'switch' and 'p2' in params[0]:
             self.__update_opp_mons(params)
             return asyncio.sleep(0)
-        elif inp_type == 'turn' or (inp_type == 'faint' and 'p1' in params[0]) or inp_type == 'error':
-            return self.__next_move(inp_type == 'faint' and 'p1' in params[0])
         elif inp_type == 'win':
             return self.__end_words(params)
         else:
             return asyncio.sleep(0)
 
-    def __update_team(self, team_params):
-        team_dict = json.loads(team_params[0])
-        if not '{"forceSwitch":' in team_params[0]:
+    def __update_team(self, team_dict):
+        if 'active' in team_dict.keys():
             self.__big_brain.active_moves_list = team_dict['active'][0]['moves']
         self.__big_brain.pokemon_list = team_dict['side']['pokemon']
 
@@ -43,7 +42,7 @@ class Gen1Knight():
             self.__big_brain.opp_pokemon_list.append(opp_mon)
 
     def __next_move(self, is_forced_switch):
-        do_switch, my_selection = self.__big_brain.next_move(is_forced_switch)
+        do_switch, my_selection = self.__big_brain.get_next_move(is_forced_switch)
         if do_switch:
             return self.room_obj.switch(my_selection)
         else:

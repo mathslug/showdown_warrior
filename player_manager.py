@@ -63,5 +63,5 @@ class ChallengeClient(showdown.Client):
     async def on_receive(self, room_id, inp_type, params):
         if room_id in self.warriors.keys():
             await self.warriors[room_id].process_incoming(inp_type, params)
-        if inp_type == 'win':
-            await self.warriors[room_id].room_obj.leave()
+            if inp_type == 'win':
+                await self.warriors[room_id].room_obj.leave()
