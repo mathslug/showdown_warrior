@@ -3,40 +3,55 @@
 """
 Class to run the gen1 pokemon battle.
 """
-import showdown
+import asyncio
 import json
 from thinker import Gen1Thinker
 
 class Gen1Knight():
     def __init__(self, room_obj, username):
         self.room_obj = room_obj
-        self.big_brain = Gen1Thinker()
-        self.username = username
+        self.__big_brain = Gen1Thinker()
+        self.__username = username
 
-    def update_team(self, team_params):
+    def process_incoming(self, inp_type, params):
+        print(inp_type)
+        print(params)
+        print('')
+        if inp_type == 'request' and params != [''] and not '{"wait":' in params[0]:
+            self.__update_team(params)
+            return asyncio.sleep(0)
+        elif inp_type == 'switch' and 'p2' in params[0]:
+            self.__update_opp_mons(params)
+            return asyncio.sleep(0)
+        elif inp_type == 'turn' or (inp_type == 'faint' and 'p1' in params[0]) or inp_type == 'error':
+            return self.__next_move(inp_type == 'faint' and 'p1' in params[0])
+        elif inp_type == 'win':
+            return self.__end_words(params)
+        else:
+            return asyncio.sleep(0)
+
+    def __update_team(self, team_params):
         team_dict = json.loads(team_params[0])
         if not '{"forceSwitch":' in team_params[0]:
-            self.big_brain.active_moves_list = team_dict['active'][0]['moves']
-        self.big_brain.pokemon_list = team_dict['side']['pokemon']
+            self.__big_brain.active_moves_list = team_dict['active'][0]['moves']
+        self.__big_brain.pokemon_list = team_dict['side']['pokemon']
 
-    def update_opp(self, opp_params):
+    def __update_opp_mons(self, opp_params):
         opp_mon = opp_params[1]
-        if not opp_mon in self.big_brain.opp_pokemon_list:
-            self.big_brain.opp_pokemon_list.append(opp_mon)
+        self.__big_brain.opp_active_mon = opp_mon
+        if not opp_mon in self.__big_brain.opp_pokemon_list:
+            self.__big_brain.opp_pokemon_list.append(opp_mon)
 
-    def next_move(self, is_forced_switch):
-        my_action = self.big_brain.next_move(is_forced_switch)
-        return self.interpret_big_brain(my_action)
+    def __next_move(self, is_forced_switch):
+        do_switch, my_selection = self.__big_brain.next_move(is_forced_switch)
+        if do_switch:
+            return self.room_obj.switch(my_selection)
+        else:
+            return self.room_obj.move(my_selection)
 
-    def end_words(self, winner_list):
+    def __end_words(self, winner_list):
         winner = winner_list[0]
-        if winner == self.username:
+        if winner == self.__username:
             return self.room_obj.say('gg!')
         else:
             return self.room_obj.say('gg')
-
-    def interpret_big_brain(self, brain_move):
-        if 'a' == brain_move[0]:
-            return self.room_obj.move(brain_move[1:])
-        elif 's' == brain_move[0]:
-            return self.room_obj.switch(brain_move[1:])
