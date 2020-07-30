@@ -6,20 +6,9 @@ random battle challenge and runs the battles with other files
 in this repo. Partially stolen from showdown.py examples
 """
 import showdown
-import logging
 import asyncio
 from pprint import pprint
 from battle_manager import Gen1Knight
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-with open('./data/login.txt', 'rt') as f,\
-     open('./data/gen_1_team.txt', 'rt') as team1,\
-     open('./data/mono-ghost.txt', 'rt') as team2:
-    gen_1_team = team1.read()
-    ghost_team = team2.read()
-    username, password = f.read().strip().splitlines()
 
 class ChallengeClient(showdown.Client):
     async def on_connect(self):
@@ -67,5 +56,3 @@ class ChallengeClient(showdown.Client):
             await self.warriors[room_id].process_incoming(inp_type, params)
         if inp_type == 'win':
             await self.warriors[room_id].room_obj.leave()
-
-ChallengeClient(name=username,password=password,strict_exceptions=True).start()
