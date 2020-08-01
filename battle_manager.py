@@ -3,6 +3,7 @@
 """
 Class to run the gen1 pokemon battle.
 """
+import time
 import asyncio
 import json
 from thinker import Gen1Thinker
@@ -12,7 +13,6 @@ class Gen1Knight():
         self.room_obj = room_obj
         self.__big_brain = Gen1Thinker()
         self.__username = username
-        self.__turn_counter = 0
         self.__is_forced_switch = False
         self.__is_forced_stay = False
 
@@ -26,8 +26,8 @@ class Gen1Knight():
             self.__update_team(params_dict)
             self.__is_forced_switch, self.__is_forced_stay = self.__is_forced_stay_or_switch(params_dict)
             return asyncio.sleep(0)
-        elif inp_type in ['switch', '-damage']:
-            self.__switch_damage_update_mons(params[0][5:], params[-1], 'p2' in params[0])
+        elif inp_type in ['switch', '-damage', '-heal']:
+            self.__switch_damage_update_mons(params[0][5:], params[1 + (inp_type == 'switch')], 'p2' in params[0], params[1].split(', L'))
             return asyncio.sleep(0)
         elif inp_type == 'move' and 'p2' in params[0]:
             self.__move_update_opp_mons(params[1])
@@ -35,13 +35,38 @@ class Gen1Knight():
         elif inp_type == 'win':
             return self.__end_words(params)
         elif inp_type == 'turn':
-            self.__turn_counter = int(params[0])
+            self.__big_brain.turn_counter = int(params[0])
             return self.__next_move()
         elif inp_type == 'faint' and 'p1' in params[0]:
             return self.__next_move()
         elif inp_type == '-status' and 'p2' in params[0]:
             self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['status'] = params[1]
             return asyncio.sleep(0)
+        elif (inp_type == '-boost' or inp_type == '-unboost') and params[1] != 'spa':
+            if params[0].split('a: ')[0] == 'p1':
+                self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['stat_mods'][params[1]] += int(params[2])
+            elif params[0].split('a: ')[0] == 'p2':
+                self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['stat_mods'][params[1]] += int(params[2])
+                print(self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['stat_mods'][params[1]])
+            else:
+                raise Exception('boost allocation error: ' + inp_type + params[0] + params[1] + params[2])
+            return asyncio.sleep(0)
+        elif inp_type == '-start':
+            if params[1] == 'Reflect':
+                if 'p1' in params[0]:
+                    self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['is_reflect_up'] = True
+                else:
+                    self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['is_reflect_up'] = True
+            if params[1] == 'confusion':
+                if 'p1' in params[0]:
+                    self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['is_confused'] = True
+                else:
+                    self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['is_confused'] = True
+        elif inp_type == '-end' and params[1] == 'confusion':
+            if 'p1' in params[0]:
+                self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['is_confused'] = False
+            else:
+                self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['is_confused'] = False
         else:
             return asyncio.sleep(0)
 
@@ -67,6 +92,18 @@ class Gen1Knight():
             mon_id = mon['ident'][4:]
             single_pokemon_dict = dict()
             single_pokemon_dict['active'] = mon['active']
+            if self.__big_brain.turn_counter == 0:
+                single_pokemon_dict['is_confused'] = False
+                single_pokemon_dict['is_reflect_up'] = False
+                single_pokemon_dict['stat_mods'] = dict()
+                single_pokemon_dict['stat_mods']['atk'] = 0
+                single_pokemon_dict['stat_mods']['def'] = 0
+                single_pokemon_dict['stat_mods']['spe'] = 0
+                single_pokemon_dict['stat_mods']['spd'] = 0
+            else:
+                single_pokemon_dict['stat_mods'] = self.__big_brain.pokemon_dict[mon_id]['stat_mods']
+                single_pokemon_dict['is_confused'] = self.__big_brain.pokemon_dict[mon_id]['is_confused']
+                single_pokemon_dict['is_reflect_up'] = self.__big_brain.pokemon_dict[mon_id]['is_reflect_up']
             if single_pokemon_dict['active']:
                 active_mon_id = mon_id
             mon_health_str = mon['condition']
@@ -85,12 +122,13 @@ class Gen1Knight():
                     single_pokemon_dict['status'] = 'ok'
             single_pokemon_dict['moves'] = mon['moves']
             single_pokemon_dict['stats'] = mon['stats']
+            del single_pokemon_dict['stats']['spa']
             pokemon_dict[mon_id] = single_pokemon_dict
         self.__big_brain.active_mon = active_mon_id
         self.__big_brain.pokemon_dict = pokemon_dict
 
 
-    def __switch_damage_update_mons(self, mon_id, mon_health_str, is_opp_mon):
+    def __switch_damage_update_mons(self, mon_id, mon_health_str, is_opp_mon, level_param_list):
         if is_opp_mon and mon_id in self.__big_brain.opp_pokemon_dict.keys():
             single_pokemon_dict = self.__big_brain.opp_pokemon_dict[mon_id]
         elif not is_opp_mon and mon_id in self.__big_brain.pokemon_dict.keys():
@@ -98,6 +136,17 @@ class Gen1Knight():
         else:
             single_pokemon_dict = dict()
             single_pokemon_dict['moves'] = []
+
+        if len(level_param_list) > 1: # is it a switch
+            single_pokemon_dict['level'] = int(level_param_list[1])
+            # for now just reset on switch IN bc easier
+            single_pokemon_dict['is_confused'] = False
+            single_pokemon_dict['is_reflect_up'] = False
+            single_pokemon_dict['stat_mods'] = dict()
+            single_pokemon_dict['stat_mods']['atk'] = 0
+            single_pokemon_dict['stat_mods']['def'] = 0
+            single_pokemon_dict['stat_mods']['spe'] = 0
+            single_pokemon_dict['stat_mods']['spd'] = 0
 
         if 'fnt' in mon_health_str:
             single_pokemon_dict['health'] = 0
@@ -127,7 +176,7 @@ class Gen1Knight():
         self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon] = opp_single_pokemon_dict
 
     def __next_move(self):
-        asyncio.sleep(1)
+        time.sleep(1)
         do_switch, my_selection = self.__big_brain.get_next_move(self.__is_forced_switch, self.__is_forced_stay)
         if do_switch:
             return self.room_obj.switch(my_selection)
