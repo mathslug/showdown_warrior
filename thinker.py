@@ -69,12 +69,15 @@ class Gen1Thinker():
 			return 0
 		# assume EVs and IVs maxed out bc no reason for them not to be
 		opp_speed = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spe'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
-		if opp_speed > self.pokemon_dict[self.active_mon]['stats']['spe']:
+		opp_speed *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spe']
+		my_speed = self.pokemon_dict[self.active_mon]['stats']['spe']
+		my_speed *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['spe']
+		if opp_speed > my_speed:
 			if 'Counter' in self.opp_pokemon_dict[self.opp_active_mon]['moves']:
 				return 0.25
 			else:
 				return 0
-		elif opp_speed == self.pokemon_dict[self.active_mon]['stats']['spe']:
+		elif opp_speed == my_speed:
 			if 'Counter' in self.opp_pokemon_dict[self.opp_active_mon]['moves'] and 'Quick Attack' in self.opp_pokemon_dict[self.opp_active_mon]['moves']:
 				return 0.5
 			elif 'Counter' in self.opp_pokemon_dict[self.opp_active_mon]['moves']:

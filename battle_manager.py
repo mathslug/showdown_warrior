@@ -38,12 +38,18 @@ class Gen1Knight():
             return self.__next_move()
         elif inp_type == '-status' and 'p2' in params[0]:
             self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['status'] = params[1]
-        elif (inp_type == '-boost' or inp_type == '-unboost') and params[1] != 'spa':
+        elif (inp_type == '-boost') and params[1] != 'spa':
             if params[0].split('a: ')[0] == 'p1':
                 self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['stat_mods'][params[1]] += int(params[2])
             elif params[0].split('a: ')[0] == 'p2':
                 self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['stat_mods'][params[1]] += int(params[2])
-                print(self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['stat_mods'][params[1]])
+            else:
+                raise Exception('boost allocation error: ' + inp_type + params[0] + params[1] + params[2])
+        elif (inp_type == '-unboost') and params[1] != 'spa':
+            if params[0].split('a: ')[0] == 'p1':
+                self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['stat_mods'][params[1]] -= int(params[2])
+            elif params[0].split('a: ')[0] == 'p2':
+                self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['stat_mods'][params[1]] -= int(params[2])
             else:
                 raise Exception('boost allocation error: ' + inp_type + params[0] + params[1] + params[2])
         elif inp_type == '-start':
