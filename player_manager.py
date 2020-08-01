@@ -20,8 +20,7 @@ class ChallengeClient(showdown.Client):
             with open('./data/gen_1_team.txt', 'rt') as team1:
                 self.gen_1_team = team1.read()
         if path.exists('./data/mono-ghost.txt'):
-            with open('./data
-            /mono-ghost.txt', 'rt') as team2:
+            with open('./data/mono-ghost.txt', 'rt') as team2:
                 self.ghost_team = team2.read()
         await self.join('lobby')
 

@@ -25,13 +25,10 @@ class Gen1Knight():
             params_dict = json.loads(params[0])
             self.__update_team(params_dict)
             self.__is_forced_switch, self.__is_forced_stay = self.__is_forced_stay_or_switch(params_dict)
-            return asyncio.sleep(0)
         elif inp_type in ['switch', '-damage', '-heal']:
             self.__switch_damage_update_mons(params[0][5:], params[1 + (inp_type == 'switch')], 'p2' in params[0], params[1].split(', L'))
-            return asyncio.sleep(0)
         elif inp_type == 'move' and 'p2' in params[0]:
             self.__move_update_opp_mons(params[1])
-            return asyncio.sleep(0)
         elif inp_type == 'win':
             return self.__end_words(params)
         elif inp_type == 'turn':
@@ -41,7 +38,6 @@ class Gen1Knight():
             return self.__next_move()
         elif inp_type == '-status' and 'p2' in params[0]:
             self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['status'] = params[1]
-            return asyncio.sleep(0)
         elif (inp_type == '-boost' or inp_type == '-unboost') and params[1] != 'spa':
             if params[0].split('a: ')[0] == 'p1':
                 self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['stat_mods'][params[1]] += int(params[2])
@@ -50,7 +46,6 @@ class Gen1Knight():
                 print(self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['stat_mods'][params[1]])
             else:
                 raise Exception('boost allocation error: ' + inp_type + params[0] + params[1] + params[2])
-            return asyncio.sleep(0)
         elif inp_type == '-start':
             if params[1] == 'Reflect':
                 if 'p1' in params[0]:
@@ -67,8 +62,7 @@ class Gen1Knight():
                 self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['is_confused'] = False
             else:
                 self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['is_confused'] = False
-        else:
-            return asyncio.sleep(0)
+        return asyncio.sleep(0)
 
     def __is_forced_stay_or_switch(self, params_dict):
         if 'forceSwitch' in params_dict.keys():

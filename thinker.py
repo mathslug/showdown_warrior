@@ -49,7 +49,7 @@ class Gen1Thinker():
 		metrics_dict['self_hp'] = self.pokemon_dict[self.active_mon]['health'] / self.pokemon_dict[self.active_mon]['max_health']
 		metrics_dict['opp_hp'] = self.opp_pokemon_dict[self.opp_active_mon]['health'] / self.opp_pokemon_dict[self.opp_active_mon]['max_health']
 		metrics_dict['outspeed_prob'] = self.__get_outspeed_prob(action)
-		metrics_dict['is_status_move'] = self.__determine_is_status_move(action)
+		metrics_dict['is_status_move'] = int(not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status')
 		# expected damage done incl probability, assume some switch prob? or start with no switch prob
 		# expected damage received incl probability - takes into account general type stuff of switches
 		# ^ take mon types and all known move types, max min of relevant stats if more than 1
@@ -88,11 +88,3 @@ class Gen1Thinker():
 				return 0.75
 			else:
 				return 0
-
-	def __determine_is_status_move(self, action):
-		if action[0]:
-			return 0
-		elif 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status':
-			return 1
-		else:
-			return 0
