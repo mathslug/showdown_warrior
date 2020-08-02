@@ -6,7 +6,6 @@ Mostly in a different file to make it easier to work on.
 """
 import math
 import random
-import numpy as np
 from itertools import compress
 from general_poke_data import *
 
@@ -114,7 +113,7 @@ class Gen1Thinker():
 			damage = ((2 * self.pokemon_dict[self.active_mon]['level'] / 5 + 2) * gen1_moves_dict[action[1]]['bp'] * atk_stat / def_stat / 50 + 2) *\
 					236 / 255 *\
 					(1 + 0.5 * (gen1_moves_dict[action[1]]['type'] in gen1_mons_dict[self.opp_active_mon]['types'])) *\
-					np.prod(list(map(lambda type: type_effectiveness_dict[gen1_moves_dict[action[1]]['type']][type], gen1_mons_dict[self.opp_active_mon]['types'])))
+					math.prod(list(map(lambda type: type_effectiveness_dict[gen1_moves_dict[action[1]]['type']][type], gen1_mons_dict[self.opp_active_mon]['types'])))
 		prob_opp_full_hp = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['hp'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) +\
 				self.opp_pokemon_dict[self.opp_active_mon]['level'] + 10
 		return min(damage / prob_opp_full_hp, 1)
