@@ -58,6 +58,11 @@ class Gen1Knight():
                     self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['is_reflect_up'] = True
                 else:
                     self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['is_reflect_up'] = True
+            if 'creen' in params[1]:
+                if 'p1' in params[0]:
+                    self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['is_light_screen_up'] = True
+                else:
+                    self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['is_light_screen_up'] = True
             if params[1] == 'confusion':
                 if 'p1' in params[0]:
                     self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['is_confused'] = True
@@ -95,6 +100,7 @@ class Gen1Knight():
             if self.__big_brain.turn_counter == 0:
                 single_pokemon_dict['is_confused'] = False
                 single_pokemon_dict['is_reflect_up'] = False
+                single_pokemon_dict['is_light_screen_up'] = False
                 single_pokemon_dict['stat_mods'] = dict()
                 single_pokemon_dict['stat_mods']['atk'] = 0
                 single_pokemon_dict['stat_mods']['def'] = 0
@@ -104,6 +110,7 @@ class Gen1Knight():
                 single_pokemon_dict['stat_mods'] = self.__big_brain.pokemon_dict[mon_id]['stat_mods']
                 single_pokemon_dict['is_confused'] = self.__big_brain.pokemon_dict[mon_id]['is_confused']
                 single_pokemon_dict['is_reflect_up'] = self.__big_brain.pokemon_dict[mon_id]['is_reflect_up']
+                single_pokemon_dict['is_light_screen_up'] = self.__big_brain.pokemon_dict[mon_id]['is_light_screen_up']
             if single_pokemon_dict['active']:
                 active_mon_id = mon_id
             mon_health_str = mon['condition']
@@ -123,6 +130,7 @@ class Gen1Knight():
             single_pokemon_dict['moves'] = mon['moves']
             single_pokemon_dict['stats'] = mon['stats']
             del single_pokemon_dict['stats']['spa']
+            single_pokemon_dict['level'] = int(mon['details'].split(', L')[1])
             pokemon_dict[mon_id] = single_pokemon_dict
         self.__big_brain.active_mon = active_mon_id
         self.__big_brain.pokemon_dict = pokemon_dict
@@ -142,6 +150,7 @@ class Gen1Knight():
             # for now just reset on switch IN bc easier
             single_pokemon_dict['is_confused'] = False
             single_pokemon_dict['is_reflect_up'] = False
+            single_pokemon_dict['is_light_screen_up'] = False
             single_pokemon_dict['stat_mods'] = dict()
             single_pokemon_dict['stat_mods']['atk'] = 0
             single_pokemon_dict['stat_mods']['def'] = 0

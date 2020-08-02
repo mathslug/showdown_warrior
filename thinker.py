@@ -6,6 +6,7 @@ Mostly in a different file to make it easier to work on.
 """
 import math
 import random
+import numpy as np
 from itertools import compress
 from general_poke_data import *
 
@@ -44,12 +45,11 @@ class Gen1Thinker():
 	def __get_action_metrics(self, action):
 		metrics_dict = dict()
 		metrics_dict['action'] = action
-		print('USE')
-		print(self.opp_pokemon_dict)
 		metrics_dict['self_hp'] = self.pokemon_dict[self.active_mon]['health'] / self.pokemon_dict[self.active_mon]['max_health']
 		metrics_dict['opp_hp'] = self.opp_pokemon_dict[self.opp_active_mon]['health'] / self.opp_pokemon_dict[self.opp_active_mon]['max_health']
 		metrics_dict['outspeed_prob'] = self.__get_outspeed_prob(action)
 		metrics_dict['is_status_move'] = int(not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status')
+		metrics_dict['exp_damage_done'] = self.__get_damage_done(action)
 		# expected damage done incl probability, assume some switch prob? or start with no switch prob
 		# expected damage received incl probability - takes into account general type stuff of switches
 		# ^ take mon types and all known move types, max min of relevant stats if more than 1
@@ -68,6 +68,7 @@ class Gen1Thinker():
 		elif action[1] == 'Counter':
 			return 0
 		# assume EVs and IVs maxed out bc no reason for them not to be
+		# bonus points would be to keep track of enemy probable speed range based on previous moves
 		opp_speed = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spe'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
 		opp_speed *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spe']
 		my_speed = self.pokemon_dict[self.active_mon]['stats']['spe']
@@ -91,3 +92,29 @@ class Gen1Thinker():
 				return 0.75
 			else:
 				return 0
+
+	def __get_damage_done(self, action):
+		print('HERE')
+		print(self.pokemon_dict)
+		if action[0]:
+			damage = 0
+		elif action[1] in ['Night Shade', 'Seismic Toss']:
+			damage = self.pokemon_dict[self.active_mon]['level']
+		else:
+			if gen1_moves_dict[action[1]]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
+				atk_stat = self.pokemon_dict[self.active_mon]['stats']['spd']
+				atk_stat *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['spd']
+				def_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spd'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
+				def_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spd'] * (1 + self.opp_pokemon_dict[self.opp_active_mon]['is_light_screen_up'])
+			else:
+				atk_stat = self.pokemon_dict[self.active_mon]['stats']['atk']
+				atk_stat *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['atk']
+				def_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['def'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
+				def_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['def'] * (1 + self.opp_pokemon_dict[self.opp_active_mon]['is_reflect_up'])
+			damage = ((2 * self.pokemon_dict[self.active_mon]['level'] / 5 + 2) * gen1_moves_dict[action[1]]['bp'] * atk_stat / def_stat / 50 + 2) *\
+					236 / 255 *\
+					(1 + 0.5 * (gen1_moves_dict[action[1]]['type'] in gen1_mons_dict[self.opp_active_mon]['types'])) *\
+					np.prod(list(map(lambda type: type_effectiveness_dict[gen1_moves_dict[action[1]]['type']][type], gen1_mons_dict[self.opp_active_mon]['types'])))
+		prob_opp_full_hp = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['hp'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) +\
+				self.opp_pokemon_dict[self.opp_active_mon]['level'] + 10
+		return min(damage / prob_opp_full_hp, 1)
