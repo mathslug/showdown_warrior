@@ -65,3 +65,10 @@ class ChallengeClient(showdown.Client):
             await self.warriors[room_id].process_incoming(inp_type, params)
             if inp_type == 'win':
                 await self.warriors[room_id].room_obj.leave()
+
+    async def on_room_deinit(self, room_obj):
+        user_inp = input('Do another battle (y/n)?').lower()
+        if user_inp == 'y':
+            await self.search_battles('', 'gen1randombattle')
+        else:
+            quit()

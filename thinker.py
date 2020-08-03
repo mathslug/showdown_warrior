@@ -12,7 +12,9 @@ from itertools import compress
 from general_poke_data import *
 
 class Gen1Thinker():
-	def __init__(self):
+	def __init__(self, training_mode=True):
+		# figure out how to pass training_mode from start_warrior
+		self.training_mode = training_mode
 		self.turn_counter = 0
 		self.active_mon = ''
 		self.active_moves_list = []
@@ -40,7 +42,7 @@ class Gen1Thinker():
 		usable_moves = compress(map(lambda move: move['move'], self.active_moves_list), moves_selectable_list)
 		usable_moves = map(lambda move: [False, move], usable_moves)
 
-		mons_switchable_list = map(lambda key: 'fnt' != self.pokemon_dict[key]['status'] and not self.pokemon_dict[key]['active'] and not is_forced_stay, self.pokemon_dict.keys())
+		mons_switchable_list = map(lambda key: 'fnt' != self.pokemon_dict[key]['status'] and not key == self.active_mon and not is_forced_stay, self.pokemon_dict.keys())
 		usable_mons = compress(self.pokemon_dict.keys(), mons_switchable_list)
 		usable_mons =  map(lambda mon: [True, mon], usable_mons)
 
@@ -50,11 +52,8 @@ class Gen1Thinker():
 		action_metrics_list = list(map(self.__get_action_metrics, actions))
 		print('CHOICES')
 		for idx in range(0, len(action_metrics_list)):
-			action_metrics_list[idx]['choice'] = idx + 1
-		print(action_metrics_list)
-		# figure out how to pass training mode down
-		training_mode = True
-		if training_mode:
+			print([idx + 1, action_metrics_list[idx]['action'][1]])
+		if self.training_mode:
 			print('')
 			user_inp = int(input('What should we do?'))
 			selected_action_metrics =  action_metrics_list[user_inp - 1]

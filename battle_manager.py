@@ -37,6 +37,9 @@ class Gen1Knight():
         elif inp_type == 'turn':
             self.__big_brain.turn_counter = int(params[0])
             return self.__next_move()
+        elif inp_type == 'error':
+            print('ERROR, RE-CHOOSING')
+            return self.__next_move()
         elif inp_type == 'faint' and 'p1' in params[0]:
             return self.__next_move()
         elif inp_type == '-status' and 'p2' in params[0]:
@@ -140,6 +143,7 @@ class Gen1Knight():
 
 
     def __switch_damage_update_mons(self, mon_id, mon_health_str, is_opp_mon, level_param_list):
+        time.sleep(2)
         if is_opp_mon and mon_id in self.__big_brain.opp_pokemon_dict.keys():
             single_pokemon_dict = self.__big_brain.opp_pokemon_dict[mon_id]
         elif not is_opp_mon and mon_id in self.__big_brain.pokemon_dict.keys():
@@ -188,7 +192,7 @@ class Gen1Knight():
         self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon] = opp_single_pokemon_dict
 
     def __next_move(self):
-        time.sleep(2)
+        time.sleep(4)
         do_switch, my_selection = self.__big_brain.get_next_move(self.__is_forced_switch, self.__is_forced_stay)
         if do_switch:
             return self.room_obj.switch(my_selection)

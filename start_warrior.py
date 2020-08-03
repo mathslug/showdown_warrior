@@ -20,4 +20,4 @@ else:
 
 ChallengeClient(name=username,
                 password=password,
-                strict_exceptions=True).start()
+                strict_exceptions=False).start()
