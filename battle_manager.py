@@ -32,7 +32,7 @@ class Gen1Knight():
             if params[1] != self.__username:
                 self.__opp_name = params[1]
         elif inp_type in ['switch', '-damage', '-heal']:
-            time.sleep(1)
+            time.sleep(0.5)
             self.__switch_damage_update_mons(params[0][5:], params[1 + (inp_type == 'switch')], self.__player_dict[self.__opp_name] in params[0], params[1].split(', L'))
         elif inp_type == 'move':
             if self.__player_dict[self.__opp_name] in params[0]:
@@ -43,7 +43,7 @@ class Gen1Knight():
             return self.__end_words(params)
         elif inp_type == 'turn':
             self.__big_brain.turn_counter = int(params[0])
-            time.sleep(2)
+            time.sleep(1)
             return self.__next_move()
         elif inp_type == 'error':
             print('ERROR, RE-CHOOSING')
