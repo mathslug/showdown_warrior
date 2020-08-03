@@ -27,8 +27,11 @@ class Gen1Knight():
             self.__is_forced_switch, self.__is_forced_stay = self.__is_forced_stay_or_switch(params_dict)
         elif inp_type in ['switch', '-damage', '-heal']:
             self.__switch_damage_update_mons(params[0][5:], params[1 + (inp_type == 'switch')], 'p2' in params[0], params[1].split(', L'))
-        elif inp_type == 'move' and 'p2' in params[0]:
-            self.__move_update_opp_mons(params[1])
+        elif inp_type == 'move':
+            if 'p2' in params[0]:
+                self.__move_update_opp_mons(params[1])
+            if params[1] == 'Haze':
+                self.__haze_reset('p2' in params[0])
         elif inp_type == 'win':
             return self.__end_words(params)
         elif inp_type == 'turn':
@@ -193,8 +196,23 @@ class Gen1Knight():
             return self.room_obj.move(my_selection)
 
     def __end_words(self, winner_list):
-        winner = winner_list[0]
-        if winner == self.__username:
+        knight_wins = winner_list[0] == self.__username
+        self.__big_brain.record_battle(knight_wins)
+        if knight_wins:
             return self.room_obj.say('gg!')
         else:
             return self.room_obj.say('gg')
+
+    def  __haze_reset(self, is_user_opp):
+        if is_user_opp:
+            self.__big_brain.pokemon_dict[self.__big_brain.active_mon]['status'] = 'ok'
+        else:
+            self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['status'] = 'ok'
+        for single_pokemon_dict in [self.__big_brain.pokemon_dict[self.__big_brain.active_mon],  self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]]:
+            single_pokemon_dict['is_confused'] = False
+            single_pokemon_dict['is_reflect_up'] = False
+            single_pokemon_dict['is_light_screen_up'] = False
+            single_pokemon_dict['stat_mods']['atk'] = 0
+            single_pokemon_dict['stat_mods']['def'] = 0
+            single_pokemon_dict['stat_mods']['spe'] = 0
+            single_pokemon_dict['stat_mods']['spd'] = 0
