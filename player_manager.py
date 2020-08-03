@@ -23,6 +23,8 @@ class ChallengeClient(showdown.Client):
             with open('./data/mono-ghost.txt', 'rt') as team2:
                 self.ghost_team = team2.read()
         await self.join('lobby')
+        await asyncio.sleep(5)
+        await self.search_battles('', 'gen1randombattle')
 
     async def on_private_message(self, pm):
         if pm.recipient == self:

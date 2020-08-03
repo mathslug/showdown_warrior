@@ -96,6 +96,8 @@ class Gen1Thinker():
 		opp_speed = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spe'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
 		opp_speed *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spe']
 		opp_speed *= 0.25 ** (self.opp_pokemon_dict[self.opp_active_mon]['status'] == 'par')
+		print(self.pokemon_dict)
+		print(self.pokemon_dict[self.active_mon])
 		my_speed = self.pokemon_dict[self.active_mon]['stats']['spe']
 		my_speed *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['spe']
 		my_speed *= 0.25 ** (self.pokemon_dict[self.active_mon]['status'] == 'par')
@@ -124,6 +126,8 @@ class Gen1Thinker():
 			damage = 0
 		elif action[1] in ['Night Shade', 'Seismic Toss']:
 			damage = self.pokemon_dict[self.active_mon]['level']
+		elif action[1] == 'Dragon Rage':
+			damage = 40
 		else:
 			if gen1_moves_dict[action[1]]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
 				atk_stat = self.pokemon_dict[self.active_mon]['stats']['spd']
