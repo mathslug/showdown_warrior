@@ -10,6 +10,7 @@ from itertools import compress
 from general_poke_data import *
 
 class Gen1Thinker():
+#Initialize Parameters
 	def __init__(self):
 		self.turn_counter = 0
 		self.active_mon = ''
@@ -18,12 +19,16 @@ class Gen1Thinker():
 		self.opp_active_mon = ''
 		self.opp_pokemon_dict = dict()
 
+#Chooses next move based off of all possible moves
 	def get_next_move(self, is_forced_switch, is_forced_stay):
 		actions = self.__get_possible_actions(is_forced_switch, is_forced_stay)
 		selection = self.__choose_next_action(actions)
 		return selection
 
+#Isolates usable moves and switchable mons
 	def __get_possible_actions(self, is_forced_switch, is_forced_stay):
+#Are there any force switch moves? I thought roar and whirlwind autopicked one. Would i just be teleport
+#Also not sure but does this take into account disable?
 		moves_selectable_list = map(lambda move: not 'pp' in move.keys() or move['pp'] !=  0 and not is_forced_switch, self.active_moves_list)
 		usable_moves = compress(map(lambda move: move['move'], self.active_moves_list), moves_selectable_list)
 		usable_moves = map(lambda move: [False, move], usable_moves)
@@ -34,6 +39,7 @@ class Gen1Thinker():
 
 		return list(usable_mons) + list(usable_moves)
 
+#Runs action analysis metric and then does the action with the best score
 	def __choose_next_action(self, actions):
 		action_metrics_list = list(map(self.__get_action_metrics, actions))
 		max_npw_score = max(map(lambda d: d['npw_score'], action_metrics_list))
@@ -41,6 +47,9 @@ class Gen1Thinker():
 		best_action_list = list(compress(actions, is_best_action_list))
 		return random.choice(best_action_list)
 
+#Collects all relevant metrics for determining value of a move
+#This is more advanced but we should think about how reflect and whirlwind and roar as well as stat boosters fit in since they arent status
+#Moves but also don't do damage
 	def __get_action_metrics(self, action):
 		metrics_dict = dict()
 		metrics_dict['action'] = action
@@ -53,14 +62,19 @@ class Gen1Thinker():
 		# expected damage received incl probability - takes into account general type stuff of switches
 		# ^ take mon types and all known move types, max min of relevant stats if more than 1
 		metrics_dict['npw_score'] = self.__get_predicted_npw_score(metrics_dict)
+		# Maybe add metric for whether or not one pokemons type is super effective against the other I know
+		#^The damage calculator takes typing into account but I feel like it can be a decent predictor of switching
+		#Another interesting metric might probability of an attack being super effective against a switch in
 		return metrics_dict
 
+#This may prioritize damage moves as you usually end a battle with them. I have some thoughts on this
 	def __get_predicted_npw_score(self, metrics_dict):
 		# npw = sqrt(1 / # turns to win)
 		#or, more like npv, npw = 1 / (1.1)^turns to win, replace 1.2 with something to make avg win time ~ .5
 		# 0 = did not win
 		return 0
 
+#Determines probability of outspeeding your opponent
 	def __get_outspeed_prob(self, action):
 		if action[0] or action[1] == 'Quick Attack':
 			return 1
@@ -89,9 +103,11 @@ class Gen1Thinker():
 		else:
 			if 'Quick Attack' in self.opp_pokemon_dict[self.opp_active_mon]['moves']:
 				return 0.75
+		#Should this last 0 be 1?
 			else:
 				return 0
 
+#Calculates damage done by each attack
 	def __get_damage_done(self, action):
 		print('HERE')
 		print(self.pokemon_dict)
