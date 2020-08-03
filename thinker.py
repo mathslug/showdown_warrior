@@ -48,10 +48,21 @@ class Gen1Thinker():
 
 	def __choose_next_action(self, actions):
 		action_metrics_list = list(map(self.__get_action_metrics, actions))
-		max_npw_score = max(map(lambda d: d['predicted_npw_score'], action_metrics_list))
-		is_best_action_list = list(map(lambda d: d['predicted_npw_score'] == max_npw_score, action_metrics_list))
-		best_action_metric_list = list(compress(action_metrics_list, is_best_action_list))
-		selected_action_metrics = random.choice(action_metrics_list)
+		print('CHOICES')
+		for idx in range(0, len(action_metrics_list)):
+			action_metrics_list[idx]['choice'] = idx + 1
+		print(action_metrics_list)
+		# figure out how to pass training mode down
+		training_mode = True
+		if training_mode:
+			print('')
+			user_inp = int(input('What should we do?'))
+			selected_action_metrics =  action_metrics_list[user_inp - 1]
+		else:
+			max_npw_score = max(map(lambda d: d['predicted_npw_score'], action_metrics_list))
+			is_best_action_list = list(map(lambda d: d['predicted_npw_score'] == max_npw_score, action_metrics_list))
+			best_action_metric_list = list(compress(action_metrics_list, is_best_action_list))
+			selected_action_metrics = random.choice(action_metrics_list)
 		self.__record_single_action(selected_action_metrics)
 		return selected_action_metrics['action']
 
@@ -110,9 +121,7 @@ class Gen1Thinker():
 				return 1
 
 	def __get_damage_done(self, action):
-		print('HERE')
-		print(self.pokemon_dict)
-		if action[0] or gen1_moves_dict[action[1]]['category'] == 'Status':
+		if action[0] or ('category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status'):
 			damage = 0
 		elif action[1] in ['Night Shade', 'Seismic Toss']:
 			damage = self.pokemon_dict[self.active_mon]['level']
@@ -186,5 +195,5 @@ class Gen1Thinker():
 		# should probably have start_warrior pass this down. idk.
 		if path.exists('./data/battle_records.csv'):
 			old_battle_frame = pd.read_csv('./data/battle_records.csv')
-			battle_frame = old_battle_frame.merge(battle_frame)
+			battle_frame = pd.concat([battle_frame, old_battle_frame])
 		battle_frame.to_csv('./data/battle_records.csv')
