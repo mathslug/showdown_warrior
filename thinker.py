@@ -8,6 +8,7 @@ import math
 import random
 import pandas as pd
 from os import path
+from sklearn.neighbors import KNeighborsRegressor
 from itertools import compress
 from general_poke_data import *
 
@@ -31,6 +32,20 @@ class Gen1Thinker():
 		self.__battle_metrics['exp_damage_done'] = []
 		self.__battle_metrics['exp_damage_received'] = []
 		self.__battle_metrics['predicted_npw_score'] = []
+		if path.exists('./data/battle_records.csv'):
+			self.__training_data = pd.read_csv('./data/battle_records.csv')
+			self.__knner = KNeighborsRegressor(n_neighbors=5).fit(self.__training_data[['self_hp',
+																					'opp_hp',
+																					'outspeed_prob',
+																					'is_status_move',
+																					'exp_damage_done',
+																					'exp_damage_received']],
+																self.__training_data.actual_npw_score)
+			def __knnpred(df): return self.__knner.predict(df)[0]
+		else:
+			self.__training_data = pd.DataFrame()
+			def __knnpred(df): return 0
+		self.__knnpred = __knnpred
 
 	def get_next_move(self, is_forced_switch, is_forced_stay):
 		actions = self.__get_possible_actions(is_forced_switch, is_forced_stay)
@@ -50,9 +65,10 @@ class Gen1Thinker():
 
 	def __choose_next_action(self, actions):
 		action_metrics_list = list(map(self.__get_action_metrics, actions))
+		print(action_metrics_list)
 		print('CHOICES')
 		for idx in range(0, len(action_metrics_list)):
-			print([idx + 1, action_metrics_list[idx]['action'][1]])
+			print([idx + 1, action_metrics_list[idx]['action']])
 		if self.training_mode:
 			print('')
 			user_inp = int(input('What should we do?'))
@@ -63,11 +79,12 @@ class Gen1Thinker():
 			best_action_metric_list = list(compress(action_metrics_list, is_best_action_list))
 			selected_action_metrics = random.choice(action_metrics_list)
 		self.__record_single_action(selected_action_metrics)
-		return selected_action_metrics['action']
+		return [selected_action_metrics['is_switch'], selected_action_metrics['action']]
 
 	def __get_action_metrics(self, action):
 		metrics_dict  = dict()
-		metrics_dict['action'] = action
+		metrics_dict['is_switch'] = action[0]
+		metrics_dict['action'] = action[1]
 		metrics_dict['self_hp'] = self.pokemon_dict[self.active_mon]['health'] / self.pokemon_dict[self.active_mon]['max_health']
 		metrics_dict['opp_hp'] = self.opp_pokemon_dict[self.opp_active_mon]['health'] / self.opp_pokemon_dict[self.opp_active_mon]['max_health']
 		metrics_dict['outspeed_prob'] = self.__get_outspeed_prob(action)
@@ -84,7 +101,14 @@ class Gen1Thinker():
 		# npw = sqrt(1 / # turns to win)
 		#or, more like npv, npw = 1 / (1.1)^turns to win, replace 1.2 with something to make avg win time ~ .5
 		# 0 = did not win
-		return 0
+		metrics_df = pd.DataFrame(metrics_dict, index = [0])
+		metrics_df = metrics_df[['self_hp',
+								'opp_hp',
+								'outspeed_prob',
+								'is_status_move',
+								'exp_damage_done',
+								'exp_damage_received']]
+		return self.__knnpred(metrics_df)
 
 	def __get_outspeed_prob(self, action):
 		if action[0] or action[1] == 'Quick Attack':
@@ -96,8 +120,6 @@ class Gen1Thinker():
 		opp_speed = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spe'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
 		opp_speed *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spe']
 		opp_speed *= 0.25 ** (self.opp_pokemon_dict[self.opp_active_mon]['status'] == 'par')
-		print(self.pokemon_dict)
-		print(self.pokemon_dict[self.active_mon])
 		my_speed = self.pokemon_dict[self.active_mon]['stats']['spe']
 		my_speed *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['spe']
 		my_speed *= 0.25 ** (self.pokemon_dict[self.active_mon]['status'] == 'par')
@@ -195,8 +217,5 @@ class Gen1Thinker():
 	def record_battle(self, knight_wins):
 		self.__battle_metrics['actual_npw_score'] = list(map(lambda turn: knight_wins / 1.1 ** (self.turn_counter - turn), self.__battle_metrics['turn']))
 		battle_frame = pd.DataFrame.from_dict(self.__battle_metrics)
-		# should probably have start_warrior pass this down. idk.
-		if path.exists('./data/battle_records.csv'):
-			old_battle_frame = pd.read_csv('./data/battle_records.csv')
-			battle_frame = pd.concat([battle_frame, old_battle_frame])
-		battle_frame.to_csv('./data/battle_records.csv')
+		all_battle_frame = pd.concat([battle_frame, self.__training_data])
+		all_battle_frame.to_csv('./data/battle_records.csv')

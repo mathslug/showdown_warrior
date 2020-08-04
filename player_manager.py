@@ -24,6 +24,7 @@ class ChallengeClient(showdown.Client):
                 self.ghost_team = team2.read()
         await self.join('lobby')
         await asyncio.sleep(5)
+        # uncomment below line to start searching on login
         await self.search_battles('', 'gen1randombattle')
 
     async def on_private_message(self, pm):
