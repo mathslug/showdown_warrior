@@ -3,7 +3,6 @@
 """
 Class to run the gen1 pokemon battle.
 """
-import time
 import asyncio
 import json
 from thinker import Gen1Thinker
@@ -42,11 +41,11 @@ class Gen1Knight():
             return self.__end_words(params)
         elif inp_type == 'turn':
             self.__big_brain.turn_counter = int(params[0])
-            time.sleep(2.1)
             return self.__next_move()
         elif inp_type == 'error':
             print('ERROR, RE-CHOOSING')
             return self.__next_move()
+        # add only if remaining mons both sides > 0
         elif inp_type == 'faint' and self.__player_dict[self.__username] in params[0]:
             return self.__next_move()
         elif inp_type == '-status' and self.__player_dict[self.__opp_name] in params[0]:
@@ -119,6 +118,7 @@ class Gen1Knight():
                 single_pokemon_dict['stat_mods']['def'] = 0
                 single_pokemon_dict['stat_mods']['spe'] = 0
                 single_pokemon_dict['stat_mods']['spd'] = 0
+                single_pokemon_dict['stat_mods']['accuracy'] = 0
             else:
                 single_pokemon_dict['stat_mods'] = self.__big_brain.pokemon_dict[mon_id]['stat_mods']
                 single_pokemon_dict['is_confused'] = self.__big_brain.pokemon_dict[mon_id]['is_confused']
@@ -169,6 +169,7 @@ class Gen1Knight():
             single_pokemon_dict['stat_mods']['def'] = 0
             single_pokemon_dict['stat_mods']['spe'] = 0
             single_pokemon_dict['stat_mods']['spd'] = 0
+            single_pokemon_dict['stat_mods']['accuracy'] = 0
 
         if 'fnt' in mon_health_str:
             single_pokemon_dict['health'] = 0
@@ -225,3 +226,4 @@ class Gen1Knight():
             single_pokemon_dict['stat_mods']['def'] = 0
             single_pokemon_dict['stat_mods']['spe'] = 0
             single_pokemon_dict['stat_mods']['spd'] = 0
+            single_pokemon_dict['stat_mods']['accuracy'] = 0

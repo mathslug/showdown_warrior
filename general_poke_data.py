@@ -21,7 +21,11 @@ gen1_mons_dict = {
     'bs': {'hp': 55, 'atk': 50, 'def': 45, 'spe': 120, 'spd': 135},
     'weightkg': 48
   },
-  'Arbok': {'types': ['Poison'], 'bs': {'hp': 60, 'atk': 85, 'def': 69, 'spe': 80, 'spd': 65}, 'weightkg': 65},
+  'Arbok': {
+    'types': ['Poison'],
+    'bs': {'hp': 60, 'atk': 85, 'def': 69, 'spe': 80, 'spd': 65},
+    'weightkg': 65
+  },
   'Arcanine': {
     'types': ['Fire'],
     'bs': {'hp': 90, 'atk': 110, 'def': 80, 'spe': 95, 'spd': 80},
@@ -87,7 +91,11 @@ gen1_mons_dict = {
     'weightkg': 19,
     'nfe': True
   },
-  'Clefable': {'types': ['Normal'], 'bs': {'hp': 95, 'atk': 70, 'def': 73, 'spe': 60, 'spd': 85}, 'weightkg': 40},
+  'Clefable': {
+    'types': ['Normal'],
+    'bs': {'hp': 95, 'atk': 70, 'def': 73, 'spe': 60, 'spd': 85},
+    'weightkg': 40
+  },
   'Clefairy': {
     'types': ['Normal'],
     'bs': {'hp': 70, 'atk': 45, 'def': 48, 'spe': 35, 'spd': 60},
@@ -116,7 +124,11 @@ gen1_mons_dict = {
     'weightkg': 0.8,
     'nfe': True
   },
-  'Ditto': {'types': ['Normal'], 'bs': {'hp': 48, 'atk': 48, 'def': 48, 'spe': 48, 'spd': 48}, 'weightkg': 4},
+  'Ditto': {
+    'types': ['Normal'],
+    'bs': {'hp': 48, 'atk': 48, 'def': 48, 'spe': 48, 'spd': 48},
+    'weightkg': 4
+  },
   'Dodrio': {
     'types': ['Normal', 'Flying'],
     'bs': {'hp': 60, 'atk': 110, 'def': 70, 'spe': 100, 'spd': 60},
@@ -199,7 +211,11 @@ gen1_mons_dict = {
     'bs': {'hp': 65, 'atk': 90, 'def': 65, 'spe': 100, 'spd': 61},
     'weightkg': 38
   },
-  'Flareon': {'types': ['Fire'], 'bs': {'hp': 65, 'atk': 130, 'def': 60, 'spe': 65, 'spd': 110}, 'weightkg': 25},
+  'Flareon': {
+    'types': ['Fire'],
+    'bs': {'hp': 65, 'atk': 130, 'def': 60, 'spe': 65, 'spd': 110},
+    'weightkg': 25
+  },
   'Gastly': {
     'types': ['Ghost', 'Poison'],
     'bs': {'hp': 30, 'atk': 35, 'def': 30, 'spe': 80, 'spd': 100},
@@ -234,7 +250,11 @@ gen1_mons_dict = {
     'weightkg': 15,
     'nfe': True
   },
-  'Golduck': {'types': ['Water'], 'bs': {'hp': 80, 'atk': 82, 'def': 78, 'spe': 85, 'spd': 80}, 'weightkg': 76.6},
+  'Golduck': {
+    'types': ['Water'],
+    'bs': {'hp': 80, 'atk': 82, 'def': 78, 'spe': 85, 'spd': 80},
+    'weightkg': 76.6
+  },
   'Golem': {
     'types': ['Rock', 'Ground'],
     'bs': {'hp': 80, 'atk': 110, 'def': 130, 'spe': 45, 'spd': 55},
@@ -340,7 +360,11 @@ gen1_mons_dict = {
     'bs': {'hp': 105, 'atk': 95, 'def': 80, 'spe': 90, 'spd': 40},
     'weightkg': 80
   },
-  'Kingler': {'types': ['Water'], 'bs': {'hp': 55, 'atk': 130, 'def': 115, 'spe': 75, 'spd': 50}, 'weightkg': 60},
+  'Kingler': {
+    'types': ['Water'],
+    'bs': {'hp': 55, 'atk': 130, 'def': 115, 'spe': 75, 'spd': 50},
+    'weightkg': 60
+  },
   'Koffing': {
     'types': ['Poison'],
     'bs': {'hp': 40, 'atk': 65, 'def': 95, 'spe': 35, 'spd': 60},
@@ -408,7 +432,11 @@ gen1_mons_dict = {
     'weightkg': 28,
     'nfe': True
   },
-  'Marowak': {'types': ['Ground'], 'bs': {'hp': 60, 'atk': 80, 'def': 110, 'spe': 45, 'spd': 50}, 'weightkg': 45},
+  'Marowak': {
+    'types': ['Ground'],
+    'bs': {'hp': 60, 'atk': 80, 'def': 110, 'spe': 45, 'spd': 50},
+    'weightkg': 45
+  },
   'Meowth': {
     'types': ['Normal'],
     'bs': {'hp': 40, 'atk': 45, 'def': 35, 'spe': 90, 'spd': 40},
@@ -441,7 +469,11 @@ gen1_mons_dict = {
     'bs': {'hp': 40, 'atk': 45, 'def': 65, 'spe': 90, 'spd': 100},
     'weightkg': 54.5
   },
-  'Muk': {'types': ['Poison'], 'bs': {'hp': 105, 'atk': 105, 'def': 75, 'spe': 50, 'spd': 65}, 'weightkg': 30},
+  'Muk': {
+    'types': ['Poison'],
+    'bs': {'hp': 105, 'atk': 105, 'def': 75, 'spe': 50, 'spd': 65},
+    'weightkg': 30
+  },
   'Nidoking': {
     'types': ['Poison', 'Ground'],
     'bs': {'hp': 81, 'atk': 92, 'def': 77, 'spe': 85, 'spd': 75},
@@ -514,7 +546,11 @@ gen1_mons_dict = {
     'bs': {'hp': 60, 'atk': 95, 'def': 80, 'spe': 30, 'spd': 80},
     'weightkg': 29.5
   },
-  'Persian': {'types': ['Normal'], 'bs': {'hp': 65, 'atk': 70, 'def': 60, 'spe': 115, 'spd': 65}, 'weightkg': 32},
+  'Persian': {
+    'types': ['Normal'],
+    'bs': {'hp': 65, 'atk': 70, 'def': 60, 'spe': 115, 'spd': 65},
+    'weightkg': 32
+  },
   'Pidgeot': {
     'types': ['Normal', 'Flying'],
     'bs': {'hp': 83, 'atk': 80, 'def': 75, 'spe': 91, 'spd': 70},
@@ -538,7 +574,11 @@ gen1_mons_dict = {
     'weightkg': 6,
     'nfe': True
   },
-  'Pinsir': {'types': ['Bug'], 'bs': {'hp': 65, 'atk': 125, 'def': 100, 'spe': 85, 'spd': 55}, 'weightkg': 55},
+  'Pinsir': {
+    'types': ['Bug'],
+    'bs': {'hp': 65, 'atk': 125, 'def': 100, 'spe': 85, 'spd': 55},
+    'weightkg': 55
+  },
   'Poliwag': {
     'types': ['Water'],
     'bs': {'hp': 40, 'atk': 50, 'def': 40, 'spe': 90, 'spd': 40},
@@ -583,7 +623,11 @@ gen1_mons_dict = {
     'bs': {'hp': 60, 'atk': 90, 'def': 55, 'spe': 100, 'spd': 90},
     'weightkg': 30
   },
-  'Rapidash': {'types': ['Fire'], 'bs': {'hp': 65, 'atk': 100, 'def': 70, 'spe': 105, 'spd': 80}, 'weightkg': 95},
+  'Rapidash': {
+    'types': ['Fire'],
+    'bs': {'hp': 65, 'atk': 100, 'def': 70, 'spe': 105, 'spd': 80},
+    'weightkg': 95
+  },
   'Raticate': {
     'types': ['Normal'],
     'bs': {'hp': 55, 'atk': 81, 'def': 60, 'spe': 97, 'spd': 50},
@@ -622,8 +666,16 @@ gen1_mons_dict = {
     'bs': {'hp': 70, 'atk': 110, 'def': 80, 'spe': 105, 'spd': 55},
     'weightkg': 56
   },
-  'Seadra': {'types': ['Water'], 'bs': {'hp': 55, 'atk': 65, 'def': 95, 'spe': 85, 'spd': 95}, 'weightkg': 25},
-  'Seaking': {'types': ['Water'], 'bs': {'hp': 80, 'atk': 92, 'def': 65, 'spe': 68, 'spd': 80}, 'weightkg': 39},
+  'Seadra': {
+    'types': ['Water'],
+    'bs': {'hp': 55, 'atk': 65, 'def': 95, 'spe': 85, 'spd': 95},
+    'weightkg': 25
+  },
+  'Seaking': {
+    'types': ['Water'],
+    'bs': {'hp': 80, 'atk': 92, 'def': 65, 'spe': 68, 'spd': 80},
+    'weightkg': 39
+  },
   'Seel': {
     'types': ['Water'],
     'bs': {'hp': 65, 'atk': 45, 'def': 55, 'spe': 45, 'spd': 70},

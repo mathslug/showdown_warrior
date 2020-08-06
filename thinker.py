@@ -4,6 +4,7 @@
 Class that does the decision-making to run the gen1 pokemon battle.
 Mostly in a different file to make it easier to work on.
 """
+import time
 import math
 import random
 import pandas as pd
@@ -78,6 +79,7 @@ class Gen1Thinker():
 			is_best_action_list = list(map(lambda d: d['predicted_npw_score'] == max_npw_score, action_metrics_list))
 			best_action_metric_list = list(compress(action_metrics_list, is_best_action_list))
 			selected_action_metrics = random.choice(action_metrics_list)
+			time.sleep(10.1)
 		self.__record_single_action(selected_action_metrics)
 		return [selected_action_metrics['is_switch'], selected_action_metrics['action']]
 
@@ -144,6 +146,7 @@ class Gen1Thinker():
 				return 1
 
 	def __get_damage_done(self, action):
+		#  to-do return zero if asleep or frozen
 		if action[0] or ('category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status'):
 			damage = 0
 		elif action[1] in ['Night Shade', 'Seismic Toss']:
@@ -172,6 +175,7 @@ class Gen1Thinker():
 		return min(damage / prob_opp_full_hp, 1)
 
 	def  __get_damage_received(self, action):
+		# to-do: return zero if enemy is asleep or frozen
 		if action[0]:
 			expected_mon = action[1]
 		else:
@@ -205,7 +209,7 @@ class Gen1Thinker():
 
 	def __record_single_action(self, metrics_dict):
 		self.__battle_metrics['turn'].append(self.turn_counter)
-		self.__battle_metrics['action'].append(metrics_dict['action'][1])
+		self.__battle_metrics['action'].append(metrics_dict['action'])
 		self.__battle_metrics['self_hp'].append(metrics_dict['self_hp'])
 		self.__battle_metrics['opp_hp'].append(metrics_dict['opp_hp'])
 		self.__battle_metrics['outspeed_prob'].append(metrics_dict['outspeed_prob'])
