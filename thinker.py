@@ -13,7 +13,7 @@ from itertools import compress
 from general_poke_data import *
 
 class Gen1Thinker():
-	def __init__(self, training_mode=True):
+	def __init__(self, training_mode=False):
 		# figure out how to pass training_mode from start_warrior
 		self.training_mode = training_mode
 		self.turn_counter = 0
