@@ -154,6 +154,10 @@ class Gen1Thinker():
 		elif action[1] == 'Dragon Rage':
 			damage = 40
 		else:
+			if 'accuracy' in gen1_moves_dict[action[1]].keys():
+				acc=gen1_moves_dict[action[1]]['accuracy'] / 100
+			else:
+				acc=1
 			if gen1_moves_dict[action[1]]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
 				atk_stat = self.pokemon_dict[self.active_mon]['stats']['spd']
 				atk_stat *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['spd']
@@ -164,7 +168,7 @@ class Gen1Thinker():
 				atk_stat *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['atk']
 				def_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['def'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
 				def_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['def'] * (1 + self.opp_pokemon_dict[self.opp_active_mon]['is_reflect_up'])
-			damage = ((2 * self.pokemon_dict[self.active_mon]['level'] / 5 + 2) * gen1_moves_dict[action[1]]['bp'] * atk_stat / def_stat / 50 + 2) *\
+			damage = ((2 * self.pokemon_dict[self.active_mon]['level'] / 5 + 2) * gen1_moves_dict[action[1]]['bp'] * acc * atk_stat / def_stat / 50 + 2) *\
 					236 / 255 *\
 					(1 + 0.5 * (gen1_moves_dict[action[1]]['type'] in gen1_mons_dict[self.active_mon]['types'])) *\
 					math.prod(list(map(lambda type: type_effectiveness_dict[gen1_moves_dict[action[1]]['type']][type], gen1_mons_dict[self.opp_active_mon]['types'])))
@@ -186,6 +190,10 @@ class Gen1Thinker():
 			expected_moves = self.opp_pokemon_dict[self.opp_active_mon]['moves']
 
 		# should fix all this and the above to use versatile functions
+		if 'accuracy' in gen1_moves_dict[move].keys():
+				acc=gen1_moves_dict[move]['accuracy'] / 100
+			else:
+				acc=1
 		damages = []
 		for move in expected_moves:
 			if gen1_moves_dict[move]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
@@ -198,7 +206,7 @@ class Gen1Thinker():
 				atk_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['atk']
 				def_stat = self.pokemon_dict[expected_mon]['stats']['def']
 				def_stat *= 1.5 ** self.pokemon_dict[expected_mon]['stat_mods']['def'] * (1 + (not action[0] and self.pokemon_dict[expected_mon]['is_reflect_up']))
-			damage = ((2 * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 5 + 2) * gen1_moves_dict[move]['bp'] * atk_stat / def_stat / 50 + 2) *\
+			damage = ((2 * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 5 + 2) * gen1_moves_dict[move]['bp'] * acc * atk_stat / def_stat / 50 + 2) *\
 					236 / 255 *\
 					(1 + 0.5 * (gen1_moves_dict[move]['type'] in gen1_mons_dict[self.opp_active_mon]['types'])) *\
 					math.prod(list(map(lambda type: type_effectiveness_dict[gen1_moves_dict[move]['type']][type], gen1_mons_dict[expected_mon]['types'])))

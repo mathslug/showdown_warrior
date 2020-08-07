@@ -27,12 +27,11 @@ class ChallengeClient(showdown.Client):
         # make it look for in-progress battles and continue them
         
         # uncomment below line to start searching on login
-<<<<<<< HEAD
         #await self.search_battles('', 'gen1randombattle')
-=======
+
         await self.search_battles('', 'gen1randombattle')
         #await self.private_message('XX', 'hello there')
->>>>>>> 19ec08ad164b04d256d62c517860264ff3a3e5a6
+
 
     async def on_private_message(self, pm):
         if pm.recipient == self:
