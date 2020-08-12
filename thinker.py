@@ -189,6 +189,7 @@ class Gen1Thinker():
 		else:
 			if 'accuracy' in gen1_moves_dict[move].keys():
 				acc=gen1_moves_dict[move]['accuracy'] / 100
+				acc *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy']
 			else:
 				acc=1
 			expected_moves = self.opp_pokemon_dict[self.opp_active_mon]['moves']
