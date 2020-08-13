@@ -23,6 +23,12 @@ class ChallengeClient(showdown.Client):
             with open('./data/mono-ghost.txt', 'rt') as team2:
                 self.ghost_team = team2.read()
         await self.join('lobby')
+        await asyncio.sleep(5)
+        # make it look for in-progress battles and continue them
+        
+        # uncomment below line to start searching on login
+        await self.search_battles('', 'gen1randombattle')
+        #await self.private_message('XX', 'hello there')
 
     async def on_private_message(self, pm):
         if pm.recipient == self:
@@ -65,3 +71,10 @@ class ChallengeClient(showdown.Client):
             await self.warriors[room_id].process_incoming(inp_type, params)
             if inp_type == 'win':
                 await self.warriors[room_id].room_obj.leave()
+
+    async def on_room_deinit(self, room_obj):
+        user_inp = input('Do another battle (y/n)?').lower()
+        if user_inp == 'y':
+            await self.search_battles('', 'gen1randombattle')
+        else:
+            quit()
