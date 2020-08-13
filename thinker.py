@@ -156,10 +156,7 @@ class Gen1Thinker():
 		else:
 			if 'accuracy' in gen1_moves_dict[action[1]].keys():
 				acc=gen1_moves_dict[action[1]]['accuracy'] / 100
-<<<<<<< HEAD
-=======
 				acc *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
->>>>>>> 9cea610a525be15286692c75a682a2f30b848e2c
 			else:
 				acc=1
 			if gen1_moves_dict[action[1]]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
