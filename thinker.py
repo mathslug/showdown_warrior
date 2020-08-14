@@ -90,7 +90,18 @@ class Gen1Thinker():
 		metrics_dict['self_hp'] = self.pokemon_dict[self.active_mon]['health'] / self.pokemon_dict[self.active_mon]['max_health']
 		metrics_dict['opp_hp'] = self.opp_pokemon_dict[self.opp_active_mon]['health'] / self.opp_pokemon_dict[self.opp_active_mon]['max_health']
 		metrics_dict['outspeed_prob'] = self.__get_outspeed_prob(action)
-		metrics_dict['is_status_move'] = int(not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status')
+		#metrics_dict['is_status_move'] = int(not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status')
+		#metrics_dict['is_status_move']
+		#Turns status condition into slidable scale based off of accuracy and percentage to apply condition
+		if not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status':
+			if 'accuracy' in gen1_moves_dict[action[1]].keys():
+				metrics_dict['is_status_move']=gen1_moves_dict[action[1]]['accuracy'] / 100
+				metrics_dict['is_status_move'] *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
+			elif 'statusperc' in gen1_moves_dict[action[1]].keys():
+				metrics_dict['is_status_move']=(gen1_moves_dict[action[1]]['accuracy']*gen1_moves_dict[action[1]]['statusperc']) / (100 * 100)
+				metrics_dict['is_status_move'] *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
+			else:
+				metrics_dict['is_status_move']=0
 		metrics_dict['exp_damage_done'] = self.__get_damage_done(action)
 		metrics_dict['exp_damage_received'] = self.__get_damage_received(action)
 		# expected damage done incl probability, assume some switch prob? or start with no switch prob
