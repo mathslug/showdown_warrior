@@ -93,15 +93,21 @@ class Gen1Thinker():
 		#metrics_dict['is_status_move'] = int(not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status')
 		#metrics_dict['is_status_move']
 		#Turns status condition into slidable scale based off of accuracy and percentage to apply condition
+
 		if not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status':
 			if 'accuracy' in gen1_moves_dict[action[1]].keys():
 				metrics_dict['is_status_move']=gen1_moves_dict[action[1]]['accuracy'] / 100
 				metrics_dict['is_status_move'] *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
-			elif 'statusperc' in gen1_moves_dict[action[1]].keys():
-				metrics_dict['is_status_move']=(gen1_moves_dict[action[1]]['accuracy']*gen1_moves_dict[action[1]]['statusperc']) / (100 * 100)
-				metrics_dict['is_status_move'] *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
 			else:
-				metrics_dict['is_status_move']=0
+				metrics_dict['is_status_move']=1
+		elif not action[0] and 'statusperc' in gen1_moves_dict[action[1]].keys() and 'accuracy' in gen1_moves_dict[action[1]].keys():
+			metrics_dict['is_status_move']=(gen1_moves_dict[action[1]]['accuracy']*gen1_moves_dict[action[1]]['statusperc']) / (100 * 100)
+			metrics_dict['is_status_move'] *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
+		elif not action[0] and 'statusperc' in gen1_moves_dict[action[1]].keys():
+			metrics_dict['is_status_move']=gen1_moves_dict[action[1]]['statusperc'] / 100
+		else:
+			metrics_dict['is_status_move']=0
+
 		metrics_dict['exp_damage_done'] = self.__get_damage_done(action)
 		metrics_dict['exp_damage_received'] = self.__get_damage_received(action)
 		# expected damage done incl probability, assume some switch prob? or start with no switch prob
@@ -199,18 +205,18 @@ class Gen1Thinker():
 		if not self.opp_pokemon_dict[self.opp_active_mon]['moves']:
 			expected_moves = ['Body Slam']
 		else:
-			if 'accuracy' in gen1_moves_dict[move].keys():
-				acc=gen1_moves_dict[move]['accuracy'] / 100
+			if 'accuracy' in self.opp_pokemon_dict[self.opp_active_mon].keys():
+				acc=self.opp_pokemon_dict[self.opp_active_mon]['accuracy'] / 100
 				acc *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy']
 			else:
 				acc=1
 			expected_moves = self.opp_pokemon_dict[self.opp_active_mon]['moves']
 
 		# should fix all this and the above to use versatile functions
-		if 'accuracy' in gen1_moves_dict[move].keys():
-				acc=gen1_moves_dict[move]['accuracy'] / 100
-			else:
-				acc=1
+		if 'accuracy' in self.opp_pokemon_dict[self.opp_active_mon].keys():
+			acc=self.opp_pokemon_dict[self.opp_active_mon]['accuracy'] / 100
+		else:
+			acc=1
 		damages = []
 		for move in expected_moves:
 			if gen1_moves_dict[move]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:

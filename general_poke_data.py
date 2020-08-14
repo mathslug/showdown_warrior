@@ -961,7 +961,7 @@ gen1_moves_dict = {
   'Spore': {'bp': 0, 'category': 'Status', 'type': 'Grass', 'accuracy':100},
   'Supersonic': {'bp': 0, 'category': 'Status', 'type': 'Normal', 'accuracy':55},
   'Swords Dance': {'bp': 0, 'category': 'Status', 'type': 'Normal'},
-  'Thunderbolt': {'bp': 95, 'type': 'Electric', 'statusperc':10},
+  'Thunderbolt': {'bp': 95, 'type': 'Electric', 'accuracy':100, 'statusperc':10},
   'Bone Club': {'bp': 65, 'type': 'Ground', 'accuracy':85},
   'Egg Bomb': {'bp': 100, 'type': 'Normal', 'accuracy':75},
   'Hyper Fang': {'bp': 80, 'type': 'Normal', 'accuracy':90},
