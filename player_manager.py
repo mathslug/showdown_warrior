@@ -68,8 +68,8 @@ class ChallengeClient(showdown.Client):
                 await room_obj.leave()
             else:
                 self.warriors[room_obj.id] = Gen1Knight(room_obj, self.name)
-                # don't stay in any room longer than 100 minutes
-                await asyncio.sleep(6000)
+                # don't stay in any room longer than 15 minutes
+                await asyncio.sleep(900)
                 await room_obj.say('I gotta run.')
                 await room_obj.forfeit()
 
