@@ -90,7 +90,7 @@ class Gen1Thinker():
 		metrics_dict['self_hp'] = self.pokemon_dict[self.active_mon]['health'] / self.pokemon_dict[self.active_mon]['max_health']
 		metrics_dict['opp_hp'] = self.opp_pokemon_dict[self.opp_active_mon]['health'] / self.opp_pokemon_dict[self.opp_active_mon]['max_health']
 		metrics_dict['outspeed_prob'] = self.__get_outspeed_prob(action)
-		
+
 		#Turns status condition into slidable scale based off of accuracy and percentage to apply condition
 		if not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status':
 			if 'accuracy' in gen1_moves_dict[action[1]].keys():
@@ -206,15 +206,15 @@ class Gen1Thinker():
 		else:
 			expected_moves = self.opp_pokemon_dict[self.opp_active_mon]['moves']
 
-		if 'accuracy' in gen1_moves_dict[move].keys():
-			acc=gen1_moves_dict[move]['accuracy'] / 100
-			acc *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy']
-		else:
-			acc=1
-
 		# should fix all this and the above to use versatile functions
 		damages = []
 		for move in expected_moves:
+			if 'accuracy' in gen1_moves_dict[move].keys():
+				acc=gen1_moves_dict[move]['accuracy'] / 100
+				acc *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy']
+			else:
+				acc=1
+
 			if gen1_moves_dict[move]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
 				atk_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spd'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
 				atk_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spd']
@@ -225,6 +225,7 @@ class Gen1Thinker():
 				atk_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['atk']
 				def_stat = self.pokemon_dict[expected_mon]['stats']['def']
 				def_stat *= 1.5 ** self.pokemon_dict[expected_mon]['stat_mods']['def'] * (1 + (not action[0] and self.pokemon_dict[expected_mon]['is_reflect_up']))
+
 			damage = ((2 * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 5 + 2) * gen1_moves_dict[move]['bp'] * acc * atk_stat / def_stat / 50 + 2) *\
 					236 / 255 *\
 					(1 + 0.5 * (gen1_moves_dict[move]['type'] in gen1_mons_dict[self.opp_active_mon]['types'])) *\
