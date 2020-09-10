@@ -90,13 +90,11 @@ class Gen1Thinker():
 		metrics_dict['self_hp'] = self.pokemon_dict[self.active_mon]['health'] / self.pokemon_dict[self.active_mon]['max_health']
 		metrics_dict['opp_hp'] = self.opp_pokemon_dict[self.opp_active_mon]['health'] / self.opp_pokemon_dict[self.opp_active_mon]['max_health']
 		metrics_dict['outspeed_prob'] = self.__get_outspeed_prob(action)
-		#metrics_dict['is_status_move'] = int(not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status')
-		#metrics_dict['is_status_move']
+		
 		#Turns status condition into slidable scale based off of accuracy and percentage to apply condition
-
 		if not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status':
 			if 'accuracy' in gen1_moves_dict[action[1]].keys():
-				metrics_dict['is_status_move']=gen1_moves_dict[action[1]]['accuracy'] / 100
+				metrics_dict['is_status_move'] = gen1_moves_dict[action[1]]['accuracy'] / 100
 				metrics_dict['is_status_move'] *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
 			else:
 				metrics_dict['is_status_move']=1
@@ -202,21 +200,19 @@ class Gen1Thinker():
 			expected_mon = action[1]
 		else:
 			expected_mon = self.active_mon
+
 		if not self.opp_pokemon_dict[self.opp_active_mon]['moves']:
 			expected_moves = ['Body Slam']
 		else:
-			if 'accuracy' in self.opp_pokemon_dict[self.opp_active_mon].keys():
-				acc=self.opp_pokemon_dict[self.opp_active_mon]['accuracy'] / 100
-				acc *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy']
-			else:
-				acc=1
 			expected_moves = self.opp_pokemon_dict[self.opp_active_mon]['moves']
 
-		# should fix all this and the above to use versatile functions
-		if 'accuracy' in self.opp_pokemon_dict[self.opp_active_mon].keys():
-			acc=self.opp_pokemon_dict[self.opp_active_mon]['accuracy'] / 100
+		if 'accuracy' in gen1_moves_dict[move].keys():
+			acc=gen1_moves_dict[move]['accuracy'] / 100
+			acc *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy']
 		else:
 			acc=1
+
+		# should fix all this and the above to use versatile functions
 		damages = []
 		for move in expected_moves:
 			if gen1_moves_dict[move]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
