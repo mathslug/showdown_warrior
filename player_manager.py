@@ -27,10 +27,14 @@ class ChallengeClient(showdown.Client):
         #to-do make it look for in-progress battles and continue them
 
         #uncomment below line to start searching on login
-        await self.search_battles('', 'gen1randombattle')
+        #await self.search_battles('', 'gen1randombattle')
 
         #uncomment below line to message user XX on init
         #await self.private_message('XX', 'hello there')
+
+        #uncomment below lines to run for 3 hours and then quit, also comment out room deinit
+        await asyncio.sleep(10800)
+        quit()
 
 
     async def on_private_message(self, pm):
@@ -75,9 +79,9 @@ class ChallengeClient(showdown.Client):
             if inp_type == 'win':
                 await self.warriors[room_id].room_obj.leave()
 
-    async def on_room_deinit(self, room_obj):
-        user_inp = input('Do another battle (y/n)?').lower()
-        if user_inp == 'y':
-            await self.search_battles('', 'gen1randombattle')
-        else:
-            quit()
+    #async def on_room_deinit(self, room_obj):
+        #user_inp = input('Do another battle (y/n)?').lower()
+        #if user_inp == 'y':
+        #    await self.search_battles('', 'gen1randombattle')
+        #else:
+        #    quit()

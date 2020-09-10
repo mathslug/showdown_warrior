@@ -20,4 +20,4 @@ else:
 
 ChallengeClient(name=username,
                 password=password,
-                strict_exceptions=True).start(autoreconnect=False)
+                strict_exceptions=True).start(autoreconnect=True)
