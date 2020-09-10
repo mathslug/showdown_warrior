@@ -35,13 +35,15 @@ class Gen1Thinker():
 		self.__battle_metrics['predicted_npw_score'] = []
 		if path.exists('./data/battle_records.csv'):
 			self.__training_data = pd.read_csv('./data/battle_records.csv', index_col=False)
-			self.__knner = KNeighborsRegressor(n_neighbors=5).fit(self.__training_data[['self_hp',
-																					'opp_hp',
-																					'outspeed_prob',
-																					'is_status_move',
-																					'exp_damage_done',
-																					'exp_damage_received']],
-																self.__training_data.actual_npw_score)
+			self.__knner = KNeighborsRegressor(
+				n_neighbors=math.floor(math.sqrt(self.__training_data.shape[0]))).fit(
+					self.__training_data[['self_hp',
+										  'opp_hp',
+										  'outspeed_prob',
+										  'is_status_move',
+										  'exp_damage_done',
+										  'exp_damage_received']],
+					self.__training_data.actual_npw_score)
 			def __knnpred(df): return self.__knner.predict(df)[0]
 		else:
 			self.__training_data = pd.DataFrame()
