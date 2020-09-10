@@ -22,12 +22,18 @@ class ChallengeClient(showdown.Client):
         if path.exists('./data/mono-ghost.txt'):
             with open('./data/mono-ghost.txt', 'rt') as team2:
                 self.ghost_team = team2.read()
+        # self.rooms only updates on init. Will need to save room IDs to disk
+        if self.rooms != {}:
+            # make it look for in-progress battles and continue them
+            print(self.rooms)
+            for rm in self.rooms.keys():
+                if 'gen1randombattle' in rm.id:
+                    self.warriors[rm.id] = Gen1Knight(rm, self.name)
+        else:
+            await asyncio.sleep(5)
+            # uncomment below line to start searching on login
+            await self.search_battles('', 'gen1randombattle')
         await self.join('lobby')
-        await asyncio.sleep(5)
-        # make it look for in-progress battles and continue them
-        
-        # uncomment below line to start searching on login
-        await self.search_battles('', 'gen1randombattle')
         #await self.private_message('XX', 'hello there')
 
     async def on_private_message(self, pm):

@@ -8,7 +8,7 @@ import json
 from thinker import Gen1Thinker
 
 class Gen1Knight():
-    def __init__(self, room_obj, username):
+    def __init__(self, room_obj, username, is_reconnect=False):
         self.room_obj = room_obj
         self.__big_brain = Gen1Thinker()
         self.__username = username
