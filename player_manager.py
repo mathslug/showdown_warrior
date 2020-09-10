@@ -32,8 +32,8 @@ class ChallengeClient(showdown.Client):
         #uncomment below line to message user XX on init
         #await self.private_message('XX', 'hello there')
 
-        #uncomment below lines to run for 3 hours and then quit, also comment out room deinit
-        await asyncio.sleep(10800)
+        #uncomment below lines to run for 2 hours and then quit, also comment out room deinit
+        await asyncio.sleep(7200)
         quit()
 
 
