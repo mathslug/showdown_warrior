@@ -34,7 +34,7 @@ class Gen1Thinker():
 		self.__battle_metrics['exp_damage_received'] = []
 		self.__battle_metrics['predicted_npw_score'] = []
 		if path.exists('./data/battle_records.csv'):
-			self.__training_data = pd.read_csv('./data/battle_records.csv')
+			self.__training_data = pd.read_csv('./data/battle_records.csv', index_col=False)
 			self.__knner = KNeighborsRegressor(n_neighbors=5).fit(self.__training_data[['self_hp',
 																					'opp_hp',
 																					'outspeed_prob',
@@ -79,7 +79,7 @@ class Gen1Thinker():
 			is_best_action_list = list(map(lambda d: d['predicted_npw_score'] == max_npw_score, action_metrics_list))
 			best_action_metric_list = list(compress(action_metrics_list, is_best_action_list))
 			selected_action_metrics = random.choice(action_metrics_list)
-			time.sleep(10.1)
+			time.sleep(2.1)
 		self.__record_single_action(selected_action_metrics)
 		return [selected_action_metrics['is_switch'], selected_action_metrics['action']]
 
@@ -249,5 +249,5 @@ class Gen1Thinker():
 	def record_battle(self, knight_wins):
 		self.__battle_metrics['actual_npw_score'] = list(map(lambda turn: knight_wins / 1.1 ** (self.turn_counter - turn), self.__battle_metrics['turn']))
 		battle_frame = pd.DataFrame.from_dict(self.__battle_metrics)
-		all_battle_frame = pd.concat([battle_frame, self.__training_data])
-		all_battle_frame.to_csv('./data/battle_records.csv')
+		all_battle_frame = pd.concat([battle_frame, self.__training_data], ignore_index=True, sort=False)
+		all_battle_frame.to_csv('./data/battle_records.csv', index=False)

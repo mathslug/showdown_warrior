@@ -24,12 +24,12 @@ class ChallengeClient(showdown.Client):
                 self.ghost_team = team2.read()
         await self.join('lobby')
         await asyncio.sleep(5)
-        # make it look for in-progress battles and continue them
-        
-        # uncomment below line to start searching on login
-        #await self.search_battles('', 'gen1randombattle')
+        #to-do make it look for in-progress battles and continue them
 
+        #uncomment below line to start searching on login
         await self.search_battles('', 'gen1randombattle')
+
+        #uncomment below line to message user XX on init
         #await self.private_message('XX', 'hello there')
 
 
@@ -64,8 +64,8 @@ class ChallengeClient(showdown.Client):
                 await room_obj.leave()
             else:
                 self.warriors[room_obj.id] = Gen1Knight(room_obj, self.name)
-                # don't stay in any room longer than 10 minutes
-                await asyncio.sleep(600)
+                # don't stay in any room longer than 100 minutes
+                await asyncio.sleep(6000)
                 await room_obj.say('I gotta run.')
                 await room_obj.forfeit()
 
