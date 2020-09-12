@@ -16,6 +16,8 @@ class Gen1Knight():
         self.__is_forced_switch = False
         self.__is_forced_stay = False
         self.__player_dict = dict()
+        self.__is_catchup_mode = False
+        self.__is_faint_move = False
 
     def process_incoming(self, inp_type, params):
         print(inp_type)
@@ -39,13 +41,25 @@ class Gen1Knight():
                 self.__haze_reset(self.__player_dict[self.__opp_name] in params[0])
         elif inp_type == 'win':
             return self.__end_words(params)
-        elif inp_type == 'turn' and self.__get_living_team_size() > 0 and int(params[0]) == (self.__big_brain.turn_counter + 1):
-            self.__big_brain.turn_counter = int(params[0])
-            return self.__next_move()
+        elif inp_type == 'turn':
+            if int(params[0]) > self.__big_brain.turn_counter:
+                self.__big_brain.turn_counter = int(params[0])
+                self.__is_catchup_mode = False
+                self.__is_faint_move = False
+                return self.__next_move()
+            elif int(params[0]) == self.__big_brain.turn_counter:
+                self.__is_catchup_mode = False
+                if not self.__is_faint_move:
+                    return self.__next_move()
+            else:
+                self.__is_catchup_mode = True
+        elif inp_type == 'faint' and self.__player_dict[self.__username] in params[0] and not self.__is_catchup_mode:
+            self.__is_faint_move = True
+            self.__big_brain.pokemon_dict[params[0][5:]]['status'] = 'fnt'
+            if self.__get_living_team_size() > 0:
+                return self.__next_move()
         elif inp_type == 'error':
             print('ERROR, RE-CHOOSING')
-            return self.__next_move()
-        elif inp_type == 'faint' and self.__get_living_team_size() > 1 and self.__player_dict[self.__username] in params[0] and self.__big_brain.active_mon == params[0][5:]:
             return self.__next_move()
         elif inp_type == '-status' and self.__player_dict[self.__opp_name] in params[0]:
             self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['status'] = params[1]
