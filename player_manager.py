@@ -33,9 +33,6 @@ class ChallengeClient(showdown.Client):
         # in case of autoreconnect, resend last move
         for room_id in self.warriors.keys():
             await self.join(room_id)
-            #await self.warriors[room_id].next_move()
-
-        #to-do make it look for in-progress battles and continue them
 
         #uncomment below line to start searching on login
         #await self.search_battles('', 'gen1randombattle')
