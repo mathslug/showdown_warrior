@@ -12,6 +12,11 @@ from battle_manager import Gen1Knight
 from os import path
 
 class ChallengeClient(showdown.Client):
+    def __init__(self, training_mode, *args, **kwargs):
+        super(ChallengeClient, self).__init__(*args, **kwargs)
+        self.training_mode = training_mode
+
+
     async def on_connect(self):
         self.warriors = dict()
         self.gen_1_team = ''
@@ -27,15 +32,14 @@ class ChallengeClient(showdown.Client):
         #to-do make it look for in-progress battles and continue them
 
         #uncomment below line to start searching on login
-        #await self.search_battles('', 'gen1randombattle')
+        await self.search_battles('', 'gen1randombattle')
 
         #uncomment below line to message user XX on init
         #await self.private_message('XX', 'hello there')
 
         #uncomment below lines to run for 2 hours and then quit, also comment out room deinit
-        await asyncio.sleep(7200)
-        quit()
-
+        #await asyncio.sleep(7200)
+        #quit()
 
     async def on_private_message(self, pm):
         if pm.recipient == self:
@@ -67,7 +71,7 @@ class ChallengeClient(showdown.Client):
                 await room_obj.forfeit()
                 await room_obj.leave()
             else:
-                self.warriors[room_obj.id] = Gen1Knight(room_obj, self.name)
+                self.warriors[room_obj.id] = Gen1Knight(room_obj, self.name, self.training_mode)
                 # don't stay in any room longer than 15 minutes
                 await asyncio.sleep(900)
                 await room_obj.say('I gotta run.')
@@ -79,9 +83,9 @@ class ChallengeClient(showdown.Client):
             if inp_type == 'win':
                 await self.warriors[room_id].room_obj.leave()
 
-    #async def on_room_deinit(self, room_obj):
-        #user_inp = input('Do another battle (y/n)?').lower()
-        #if user_inp == 'y':
-        #    await self.search_battles('', 'gen1randombattle')
-        #else:
-        #    quit()
+    async def on_room_deinit(self, room_obj):
+        user_inp = input('Do another battle (y/n)?').lower()
+        if user_inp == 'y':
+            await self.search_battles('', 'gen1randombattle')
+        else:
+            quit()

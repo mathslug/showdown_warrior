@@ -8,14 +8,15 @@ import json
 from thinker import Gen1Thinker
 
 class Gen1Knight():
-    def __init__(self, room_obj, username):
+    def __init__(self, room_obj, username, training_mode):
         self.room_obj = room_obj
-        self.__big_brain = Gen1Thinker()
+        self.__big_brain = Gen1Thinker(training_mode)
         self.__username = username
         self.__opp_name = ''
         self.__is_forced_switch = False
         self.__is_forced_stay = False
         self.__player_dict = dict()
+        self.__living_team_size = 6
 
     def process_incoming(self, inp_type, params):
         print(inp_type)
@@ -47,6 +48,7 @@ class Gen1Knight():
             return self.__next_move()
         # add only if remaining mons both sides > 0
         elif inp_type == 'faint' and self.__player_dict[self.__username] in params[0]:
+            self.__living_team_size -= 1
             return self.__next_move()
         elif inp_type == '-status' and self.__player_dict[self.__opp_name] in params[0]:
             self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['status'] = params[1]
@@ -199,11 +201,14 @@ class Gen1Knight():
         self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon] = opp_single_pokemon_dict
 
     def __next_move(self):
-        do_switch, my_selection = self.__big_brain.get_next_move(self.__is_forced_switch, self.__is_forced_stay)
-        if do_switch:
-            return self.room_obj.switch(my_selection)
+        if self.__living_team_size > 0:
+            do_switch, my_selection = self.__big_brain.get_next_move(self.__is_forced_switch, self.__is_forced_stay)
+            if do_switch:
+                return self.room_obj.switch(my_selection)
+            else:
+                return self.room_obj.move(my_selection)
         else:
-            return self.room_obj.move(my_selection)
+            return asyncio.sleep(0)
 
     def __end_words(self, winner_list):
         knight_wins = winner_list[0] == self.__username

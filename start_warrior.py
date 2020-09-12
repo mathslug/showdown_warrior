@@ -18,6 +18,7 @@ if path.exists('./data/login.txt'):
 else:
     raise Exception('No credentials saved in data directory.')
 
-ChallengeClient(name=username,
+ChallengeClient(training_mode=True,
+                name=username,
                 password=password,
-                strict_exceptions=True).start(autoreconnect=True)
+                strict_exceptions=True).start(autoreconnect=False)
