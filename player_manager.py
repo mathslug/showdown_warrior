@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Challenges a player to a random battle when PM'd, or accepts any
-random battle challenge and runs the battles with other files
-in this repo. Partially stolen from showdown.py examples
+Challenges a player to a random battle when PM'd, or
+accepts any random battle challenge and runs Gen 1
+random battles with other files in this repo.
 """
 import showdown
 import asyncio

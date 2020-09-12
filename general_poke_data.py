@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Holds  dictionary objects for relevant game data.
+Holds dictionary objects for relevant game data.
 """
 
 gen1_mons_dict = {
