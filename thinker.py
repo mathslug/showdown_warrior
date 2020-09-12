@@ -252,4 +252,5 @@ class Gen1Thinker():
 		self.__battle_metrics['actual_npw_score'] = list(map(lambda turn: knight_wins / 1.1 ** (self.turn_counter - turn), self.__battle_metrics['turn']))
 		battle_frame = pd.DataFrame.from_dict(self.__battle_metrics)
 		all_battle_frame = pd.concat([battle_frame, self.__training_data], ignore_index=True, sort=False)
+		#could add option to not record bad battles (like early forfeits) on user input, but for now just manually edit data if needed
 		all_battle_frame.to_csv('./data/battle_records.csv', index=False)

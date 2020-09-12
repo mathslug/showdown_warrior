@@ -56,7 +56,7 @@ class Gen1Knight():
         elif inp_type == 'faint' and self.__player_dict[self.__username] in params[0] and not self.__is_catchup_mode:
             self.__is_faint_move = True
             self.__big_brain.pokemon_dict[params[0][5:]]['status'] = 'fnt'
-            if self.__get_living_team_size() > 0:
+            if list(map(lambda mon: self.__big_brain.pokemon_dict[mon]['status'], self.__big_brain.pokemon_dict.keys())).count('fnt') < 6:
                 return self.__next_move()
         elif inp_type == 'error':
             print('ERROR, RE-CHOOSING')
@@ -240,10 +240,3 @@ class Gen1Knight():
             single_pokemon_dict['stat_mods']['spe'] = 0
             single_pokemon_dict['stat_mods']['spd'] = 0
             single_pokemon_dict['stat_mods']['accuracy'] = 0
-
-    def __get_living_team_size(self):
-        team_size = 6
-        for mon in self.__big_brain.pokemon_dict.keys():
-            if self.__big_brain.pokemon_dict[mon]['status'] == 'fnt':
-                team_size -= 1
-        return team_size
