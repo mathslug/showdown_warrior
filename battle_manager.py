@@ -39,7 +39,7 @@ class Gen1Knight():
                 self.__haze_reset(self.__player_dict[self.__opp_name] in params[0])
         elif inp_type == 'win':
             return self.__end_words(params)
-        elif inp_type == 'turn' and self.__get_living_team_size() > 0 and int(params[0]) == self.__big_brain.turn_counter + 1:
+        elif inp_type == 'turn' and self.__get_living_team_size() > 0 and int(params[0]) == (self.__big_brain.turn_counter + 1):
             self.__big_brain.turn_counter = int(params[0])
             return self.__next_move()
         elif inp_type == 'error':

@@ -68,23 +68,22 @@ class Gen1Thinker():
 
 	def __choose_next_action(self, actions):
 		action_metrics_list = list(map(self.__get_action_metrics, actions))
+		print(action_metrics_list)
+		print('CHOICES')
+		for idx in range(0, len(action_metrics_list)):
+			print([idx + 1, action_metrics_list[idx]['action']])
+		if self.training_mode:
+			print('')
+			user_inp = int(input('What should we do?'))
+			selected_action_metrics =  action_metrics_list[user_inp - 1]
 		else:
-			print(action_metrics_list)
-			print('CHOICES')
-			for idx in range(0, len(action_metrics_list)):
-				print([idx + 1, action_metrics_list[idx]['action']])
-			if self.training_mode:
-				print('')
-				user_inp = int(input('What should we do?'))
-				selected_action_metrics =  action_metrics_list[user_inp - 1]
-			else:
-				max_npw_score = max(map(lambda d: d['predicted_npw_score'], action_metrics_list))
-				is_best_action_list = list(map(lambda d: d['predicted_npw_score'] == max_npw_score, action_metrics_list))
-				best_action_metric_list = list(compress(action_metrics_list, is_best_action_list))
-				selected_action_metrics = random.choice(action_metrics_list)
-				time.sleep(2.1)
-			self.__record_single_action(selected_action_metrics)
-			return [selected_action_metrics['is_switch'], selected_action_metrics['action']]
+			max_npw_score = max(map(lambda d: d['predicted_npw_score'], action_metrics_list))
+			is_best_action_list = list(map(lambda d: d['predicted_npw_score'] == max_npw_score, action_metrics_list))
+			best_action_metric_list = list(compress(action_metrics_list, is_best_action_list))
+			selected_action_metrics = random.choice(action_metrics_list)
+			time.sleep(2.1)
+		self.__record_single_action(selected_action_metrics)
+		return [selected_action_metrics['is_switch'], selected_action_metrics['action']]
 
 	def __get_action_metrics(self, action):
 		metrics_dict  = dict()
