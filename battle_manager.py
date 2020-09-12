@@ -16,7 +16,8 @@ class Gen1Knight():
         self.__is_forced_switch = False
         self.__is_forced_stay = False
         self.__player_dict = dict()
-        self.__living_team_size = 6
+        self.__is_catchup_mode = False
+        self.__is_faint_move = False
 
     def process_incoming(self, inp_type, params):
         print(inp_type)
@@ -41,14 +42,24 @@ class Gen1Knight():
         elif inp_type == 'win':
             return self.__end_words(params)
         elif inp_type == 'turn':
-            self.__big_brain.turn_counter = int(params[0])
-            return self.__next_move()
+            if int(params[0]) > self.__big_brain.turn_counter:
+                self.__big_brain.turn_counter = int(params[0])
+                self.__is_catchup_mode = False
+                self.__is_faint_move = False
+                return self.__next_move()
+            elif int(params[0]) == self.__big_brain.turn_counter:
+                self.__is_catchup_mode = False
+                if not self.__is_faint_move:
+                    return self.__next_move()
+            else:
+                self.__is_catchup_mode = True
+        elif inp_type == 'faint' and self.__player_dict[self.__username] in params[0] and not self.__is_catchup_mode:
+            self.__is_faint_move = True
+            self.__big_brain.pokemon_dict[params[0][5:]]['status'] = 'fnt'
+            if list(map(lambda mon: self.__big_brain.pokemon_dict[mon]['status'], self.__big_brain.pokemon_dict.keys())).count('fnt') < 6:
+                return self.__next_move()
         elif inp_type == 'error':
             print('ERROR, RE-CHOOSING')
-            return self.__next_move()
-        # add only if remaining mons both sides > 0
-        elif inp_type == 'faint' and self.__player_dict[self.__username] in params[0]:
-            self.__living_team_size -= 1
             return self.__next_move()
         elif inp_type == '-status' and self.__player_dict[self.__opp_name] in params[0]:
             self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon]['status'] = params[1]
@@ -201,14 +212,11 @@ class Gen1Knight():
         self.__big_brain.opp_pokemon_dict[self.__big_brain.opp_active_mon] = opp_single_pokemon_dict
 
     def __next_move(self):
-        if self.__living_team_size > 0:
-            do_switch, my_selection = self.__big_brain.get_next_move(self.__is_forced_switch, self.__is_forced_stay)
-            if do_switch:
-                return self.room_obj.switch(my_selection)
-            else:
-                return self.room_obj.move(my_selection)
+        do_switch, my_selection = self.__big_brain.get_next_move(self.__is_forced_switch, self.__is_forced_stay)
+        if do_switch:
+            return self.room_obj.switch(my_selection)
         else:
-            return asyncio.sleep(0)
+            return self.room_obj.move(my_selection)
 
     def __end_words(self, winner_list):
         knight_wins = winner_list[0] == self.__username

@@ -4,8 +4,10 @@
 Run this (python start_warrior.py) to enter lobby,
 start accepting challenges, and play battles according to thinker.py.
 First consider a virtualenv, then pip install requirements.txt if needed.
+Call with --train to run in training mode.
 """
 import logging
+import sys
 from os import path
 from player_manager import ChallengeClient
 
@@ -18,7 +20,7 @@ if path.exists('./data/login.txt'):
 else:
     raise Exception('No credentials saved in data directory.')
 
-ChallengeClient(training_mode=True,
+ChallengeClient(training_mode=len(sys.argv) - 1 > 0,
                 name=username,
                 password=password,
-                strict_exceptions=True).start(autoreconnect=False)
+                strict_exceptions=True).start(autoreconnect=True)
