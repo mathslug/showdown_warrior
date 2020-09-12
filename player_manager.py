@@ -15,9 +15,6 @@ class ChallengeClient(showdown.Client):
     def __init__(self, training_mode, *args, **kwargs):
         super(ChallengeClient, self).__init__(*args, **kwargs)
         self.training_mode = training_mode
-
-
-    async def on_connect(self):
         self.warriors = dict()
         self.gen_1_team = ''
         self.ghost_team = ''
@@ -27,12 +24,21 @@ class ChallengeClient(showdown.Client):
         if path.exists('./data/mono-ghost.txt'):
             with open('./data/mono-ghost.txt', 'rt') as team2:
                 self.ghost_team = team2.read()
+
+
+    async def on_connect(self):
         await self.join('lobby')
         await asyncio.sleep(5)
+
+        # in case of autoreconnect, resend last move
+        for room_id in self.warriors.keys():
+            await self.join(room_id)
+            #await self.warriors[room_id].next_move()
+
         #to-do make it look for in-progress battles and continue them
 
         #uncomment below line to start searching on login
-        await self.search_battles('', 'gen1randombattle')
+        #await self.search_battles('', 'gen1randombattle')
 
         #uncomment below line to message user XX on init
         #await self.private_message('XX', 'hello there')
@@ -88,4 +94,5 @@ class ChallengeClient(showdown.Client):
         if user_inp == 'y':
             await self.search_battles('', 'gen1randombattle')
         else:
-            quit()
+            #quit()
+            await asyncio.sleep(0)
