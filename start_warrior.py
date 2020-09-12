@@ -7,6 +7,7 @@ First consider a virtualenv, then pip install requirements.txt if needed.
 Call with --train to run in training mode.
 """
 import logging
+import sys
 from os import path
 from player_manager import ChallengeClient
 
