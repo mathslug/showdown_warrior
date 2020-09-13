@@ -56,7 +56,7 @@ class Gen1Thinker():
 		return selection
 
 	def __get_possible_actions(self, is_forced_switch, is_forced_stay):
-		moves_selectable_list = map(lambda move: not 'pp' in move.keys() or move['pp'] !=  0 and not is_forced_switch, self.active_moves_list)
+		moves_selectable_list = map(lambda move: (not 'pp' in move.keys() or move['pp'] !=  0) and not is_forced_switch, self.active_moves_list)
 		usable_moves = compress(map(lambda move: move['move'], self.active_moves_list), moves_selectable_list)
 		usable_moves = map(lambda move: [False, move], usable_moves)
 

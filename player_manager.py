@@ -11,6 +11,9 @@ from pprint import pprint
 from battle_manager import Gen1Knight
 from os import path
 
+showdown.client.DEFAULT_RECONNECT_SLEEP = 2
+showdown.client.MAX_RECONNECT_SLEEP = 32
+
 class ChallengeClient(showdown.Client):
     def __init__(self, training_mode, *args, **kwargs):
         super(ChallengeClient, self).__init__(*args, **kwargs)
