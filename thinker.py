@@ -248,8 +248,8 @@ class Gen1Thinker():
 		self.__battle_metrics['exp_damage_received'].append(metrics_dict['exp_damage_received'])
 		self.__battle_metrics['predicted_npw_score'].append(metrics_dict['predicted_npw_score'])
 
-	def record_battle(self, knight_wins):
-		self.__battle_metrics['actual_npw_score'] = list(map(lambda turn: knight_wins / 1.1 ** (self.turn_counter - turn), self.__battle_metrics['turn']))
+	def record_battle(self, is_tie, knight_wins):
+		self.__battle_metrics['actual_npw_score'] = list(map(lambda turn: (knight_wins / 1.1 ** (self.turn_counter - turn)) / (is_tie + 1), self.__battle_metrics['turn']))
 		battle_frame = pd.DataFrame.from_dict(self.__battle_metrics)
 		all_battle_frame = pd.concat([battle_frame, self.__training_data], ignore_index=True, sort=False)
 		#could add option to not record bad battles (like early forfeits) on user input, but for now just manually edit data if needed

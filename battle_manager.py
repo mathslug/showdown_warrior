@@ -39,7 +39,7 @@ class Gen1Knight():
                 self.__move_update_opp_mons(params[1])
             if params[1] == 'Haze':
                 self.__haze_reset(self.__player_dict[self.__opp_name] in params[0])
-        elif inp_type == 'win':
+        elif inp_type in ['win', 'tie']:
             return self.__end_words(params)
         elif inp_type == 'turn':
             if int(params[0]) > self.__big_brain.turn_counter:
@@ -219,8 +219,13 @@ class Gen1Knight():
             return self.room_obj.move(my_selection)
 
     def __end_words(self, winner_list):
-        knight_wins = winner_list[0] == self.__username
-        self.__big_brain.record_battle(knight_wins)
+        if winner_list == []:
+            is_tie = True
+            knight_wins = True
+        else:
+            is_tie = False
+            knight_wins = winner_list[0] == self.__username
+        self.__big_brain.record_battle(is_tie, knight_wins)
         if knight_wins:
             return self.room_obj.say('gg!')
         else:
