@@ -132,6 +132,7 @@ class Gen1Knight():
                 single_pokemon_dict['stat_mods']['spe'] = 0
                 single_pokemon_dict['stat_mods']['spd'] = 0
                 single_pokemon_dict['stat_mods']['accuracy'] = 0
+                single_pokemon_dict['stat_mods']['evasion'] = 0
             else:
                 single_pokemon_dict['stat_mods'] = self.__big_brain.pokemon_dict[mon_id]['stat_mods']
                 single_pokemon_dict['is_confused'] = self.__big_brain.pokemon_dict[mon_id]['is_confused']
@@ -183,6 +184,7 @@ class Gen1Knight():
             single_pokemon_dict['stat_mods']['spe'] = 0
             single_pokemon_dict['stat_mods']['spd'] = 0
             single_pokemon_dict['stat_mods']['accuracy'] = 0
+            single_pokemon_dict['stat_mods']['evasion'] = 0
 
         if 'fnt' in mon_health_str:
             single_pokemon_dict['health'] = 0
@@ -245,3 +247,4 @@ class Gen1Knight():
             single_pokemon_dict['stat_mods']['spe'] = 0
             single_pokemon_dict['stat_mods']['spd'] = 0
             single_pokemon_dict['stat_mods']['accuracy'] = 0
+            single_pokemon_dict['stat_mods']['evasion'] = 0

@@ -97,7 +97,7 @@ class Gen1Thinker():
 		if not action[0] and 'category' in gen1_moves_dict[action[1]].keys() and gen1_moves_dict[action[1]]['category'] == 'Status':
 			if 'accuracy' in gen1_moves_dict[action[1]].keys():
 				metrics_dict['is_status_move'] = gen1_moves_dict[action[1]]['accuracy'] / 100
-				metrics_dict['is_status_move'] *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
+				metrics_dict['is_status_move'] *= 1.5 ** (self.pokemon_dict[self.active_mon]['stat_mods']['accuracy'] - self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['evasion'])
 			else:
 				metrics_dict['is_status_move']=1
 		elif not action[0] and 'statusperc' in gen1_moves_dict[action[1]].keys() and 'accuracy' in gen1_moves_dict[action[1]].keys():
@@ -172,10 +172,11 @@ class Gen1Thinker():
 			damage = 40
 		else:
 			if 'accuracy' in gen1_moves_dict[action[1]].keys():
-				acc=gen1_moves_dict[action[1]]['accuracy'] / 100
-				acc *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['accuracy']
+				acc = gen1_moves_dict[action[1]]['accuracy'] / 100
 			else:
 				acc=1
+			acc *= 1.5 ** (self.pokemon_dict[self.active_mon]['stat_mods']['accuracy'] - self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['evasion'])
+
 			if gen1_moves_dict[action[1]]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
 				atk_stat = self.pokemon_dict[self.active_mon]['stats']['spd']
 				atk_stat *= 1.5 ** self.pokemon_dict[self.active_mon]['stat_mods']['spd']
@@ -211,29 +212,36 @@ class Gen1Thinker():
 		# should fix all this and the above to use versatile functions
 		damages = []
 		for move in expected_moves:
-			if 'accuracy' in gen1_moves_dict[move].keys():
-				acc=gen1_moves_dict[move]['accuracy'] / 100
-				acc *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy']
+			if ('category' in gen1_moves_dict[move].keys() and gen1_moves_dict[move]['category'] == 'Status'):
+				damage = 0
+			elif move in ['Night Shade', 'Seismic Toss']:
+				damage = self.opp_pokemon_dict[self.opp_active_mon]['level']
+			elif move == 'Dragon Rage':
+				damage = 40
 			else:
-				acc=1
+				if 'accuracy' in gen1_moves_dict[move].keys():
+					acc = gen1_moves_dict[move]['accuracy'] / 100
+				else:
+					acc=1
+				acc *= 1.5 ** (self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['accuracy'] - self.pokemon_dict[self.active_mon]['stat_mods']['evasion'])
 
-			if gen1_moves_dict[move]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
-				atk_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spd'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
-				atk_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spd']
-				def_stat = self.pokemon_dict[expected_mon]['stats']['spd']
-				def_stat *= 1.5 ** self.pokemon_dict[expected_mon]['stat_mods']['spd'] * (1 + (not action[0] and self.pokemon_dict[expected_mon]['is_light_screen_up']))
-			else:
-				atk_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['atk'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
-				atk_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['atk']
-				def_stat = self.pokemon_dict[expected_mon]['stats']['def']
-				def_stat *= 1.5 ** self.pokemon_dict[expected_mon]['stat_mods']['def'] * (1 + (not action[0] and self.pokemon_dict[expected_mon]['is_reflect_up']))
+				if gen1_moves_dict[move]['type'] in ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']:
+					atk_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['spd'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
+					atk_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['spd']
+					def_stat = self.pokemon_dict[expected_mon]['stats']['spd']
+					def_stat *= 1.5 ** self.pokemon_dict[expected_mon]['stat_mods']['spd'] * (1 + (not action[0] and self.pokemon_dict[expected_mon]['is_light_screen_up']))
+				else:
+					atk_stat = math.floor(((gen1_mons_dict[self.opp_active_mon]['bs']['atk'] + 15) * 2 + 63) * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 100) + 5
+					atk_stat *= 1.5 ** self.opp_pokemon_dict[self.opp_active_mon]['stat_mods']['atk']
+					def_stat = self.pokemon_dict[expected_mon]['stats']['def']
+					def_stat *= 1.5 ** self.pokemon_dict[expected_mon]['stat_mods']['def'] * (1 + (not action[0] and self.pokemon_dict[expected_mon]['is_reflect_up']))
 
-			damage = ((2 * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 5 + 2) * gen1_moves_dict[move]['bp'] * acc * atk_stat / def_stat / 50 + 2) *\
+				damage = ((2 * self.opp_pokemon_dict[self.opp_active_mon]['level'] / 5 + 2) * gen1_moves_dict[move]['bp'] * acc * atk_stat / def_stat / 50 + 2) *\
 					236 / 255 *\
 					(1 + 0.5 * (gen1_moves_dict[move]['type'] in gen1_mons_dict[self.opp_active_mon]['types'])) *\
 					math.prod(list(map(lambda type: type_effectiveness_dict[gen1_moves_dict[move]['type']][type], gen1_mons_dict[expected_mon]['types'])))
-			damage *= 0.75 ** (self.opp_pokemon_dict[self.opp_active_mon]['status'] == 'par')
-			damage *= 0.5 ** (self.opp_pokemon_dict[self.opp_active_mon]['is_confused'])
+				damage *= 0.75 ** (self.opp_pokemon_dict[self.opp_active_mon]['status'] == 'par')
+				damage *= 0.5 ** (self.opp_pokemon_dict[self.opp_active_mon]['is_confused'])
 			damages.append(damage)
 		return max(damages) / self.pokemon_dict[expected_mon]['max_health']
 
@@ -252,5 +260,6 @@ class Gen1Thinker():
 		self.__battle_metrics['actual_npw_score'] = list(map(lambda turn: (knight_wins / 1.1 ** (self.turn_counter - turn)) / (is_tie + 1), self.__battle_metrics['turn']))
 		battle_frame = pd.DataFrame.from_dict(self.__battle_metrics)
 		all_battle_frame = pd.concat([battle_frame, self.__training_data], ignore_index=True, sort=False)
-		#could add option to not record bad battles (like early forfeits) on user input, but for now just manually edit data if needed
-		all_battle_frame.to_csv('./data/battle_records.csv', index=False)
+		#losses don't seem to be useful for learning early on and also attempt to screen early forfeits
+		if knight_wins and not is_tie and len(self.opp_pokemon_dict.keys()) <= 2:
+			all_battle_frame.to_csv('./data/battle_records.csv', index=False)
