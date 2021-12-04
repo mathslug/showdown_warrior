@@ -14,11 +14,11 @@ username
 password
 ```
 
-* recommended: activate a virtualenv
+* recommended: activate a virtualenv. I use poetry.
 
-* `pip install requirements.txt`
+* `poetry install`
 
-* `python start_warrior.py`
+* `poetry run python start_warrior.py`
 
 * you're done, go battle it on showdown
 
