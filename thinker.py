@@ -261,5 +261,5 @@ class Gen1Thinker():
 		battle_frame = pd.DataFrame.from_dict(self.__battle_metrics)
 		all_battle_frame = pd.concat([battle_frame, self.__training_data], ignore_index=True, sort=False)
 		#losses don't seem to be useful for learning early on and also attempt to screen early forfeits
-		if knight_wins and not is_tie and len(list(map(lambda key: 'fnt' != self.pokemon_dict[key]['status'], self.pokemon_dict.keys()))) <= 2:
-			all_battle_frame.to_csv('./data/battle_records.csv', index=False)
+		#if knight_wins and not is_tie and len(list(map(lambda key: 'fnt' != self.pokemon_dict[key]['status'], self.pokemon_dict.keys()))) <= 2:
+		all_battle_frame.to_csv('./data/battle_records.csv', index=False)
