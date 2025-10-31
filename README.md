@@ -7,7 +7,7 @@ It provides a clean interface to the Showdown API, handles authentication and co
 ## Overview
 
 This project isn’t a single “best” algorithm—it’s a framework for exploring how different ML and heuristic methods perform in Pokémon Showdown battles.
-You can customize how the bot perceives game state, what data it tracks, and how it decides the next move.
+You can customize how the bot perceives game state, what data it tracks, and how it decides the next move. You can have the bot learn by itself, or have the bot watch you and learn your playstyle.
 
 **Goals**
 
