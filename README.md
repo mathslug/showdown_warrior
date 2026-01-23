@@ -30,19 +30,19 @@ username
 password
 ```
 
-* recommended: activate a virtualenv. I use poetry.
+* install uv if you don't have it
 
-* `poetry install`
+* `uv sync`
 
-* `poetry run python start_warrior.py`
+* `uv run python start_warrior.py`
 
-* you're done, go battle it on showdown
+* go battle it
 
 * control-c to stop it
 
 ## Customization
 
-Core logic lives in thinker.py. You can modify or replace it to try different reinforcement learning methods, state representations or engineered features.
+Core logic lives in warrior_player.py. You can modify or replace it to try different reinforcement learning methods, state representations or engineered features.
 
 ## Background
 
