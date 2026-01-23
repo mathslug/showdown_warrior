@@ -23,7 +23,7 @@ You can customize how the bot perceives game state, what data it tracks, and how
 
 * git clone this repository and cd into it
 
-* save showdown credentials in `./data/login.txt` as:
+* save showdown credentials in a text file (default: `./data/login.txt`) as:
 
 ```
 username
@@ -39,6 +39,69 @@ password
 * go battle it
 
 * control-c to stop it
+
+## Usage
+
+Basic usage:
+```bash
+uv run python start_warrior.py
+```
+
+With custom credentials file:
+```bash
+uv run python start_warrior.py --credentials path/to/mycreds.txt
+# or
+uv run python start_warrior.py -c path/to/mycreds.txt
+```
+
+Additional options:
+- `--debug` - Enable debug logging
+- `--train` - Enable training mode (prompts for manual action selection)
+- `--rando` - Play 100 ladder games instead of waiting for challenges
+- `--local` - Connect to a local Pokémon Showdown server (localhost:8000)
+- `--challenge <username>` - Send challenges to a specific user instead of accepting challenges
+
+## Local Self-Play Battles
+
+To run continuous training battles between two bots on a local Pokémon Showdown server:
+
+1. Clone the Pokémon Showdown server in the parent directory:
+   ```bash
+   cd ..
+   git clone https://github.com/smogon/pokemon-showdown.git
+   cd pokemon-showdown
+   npm install
+   cd ../showdown_warrior
+   ```
+
+2. Create credentials for two bots in `data/login2.txt` (if you don't have it already):
+   ```
+   bot2username
+   bot2password
+   ```
+
+3. Run continuous training battles:
+   ```bash
+   ./continuous_battles.sh
+   ```
+
+This script will:
+- Start a local Pokémon Showdown server
+- Run battles continuously in a loop
+- After each battle:
+  - Combine training data from both bots
+  - Restart the bots so they learn from all previous battles
+  - Start the next battle automatically
+
+The bots will get progressively better as they accumulate training data!
+
+**Monitoring:**
+- Watch battles live: `tmux attach -t showdown_battle`
+  - `<prefix> 0` to switch to server window
+  - `<prefix> 1` to switch to bots window
+  - `<prefix> d` to detach (keeps it running)
+- View training data: `cat data/battle_records_combined.csv | wc -l`
+- Stop training: `Ctrl+C` in the terminal running the script
 
 ## Customization
 

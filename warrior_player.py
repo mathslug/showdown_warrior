@@ -17,11 +17,11 @@ from general_poke_data import gen1_mons_dict, gen1_moves_dict, type_effectivenes
 
 class Gen1WarriorPlayer(Player):
 
-    def __init__(self, username, password, training_mode=False, max_concurrent_battles=5, log_level=logging.INFO, **kwargs):
+    def __init__(self, username, password, training_mode=False, max_concurrent_battles=5, log_level=logging.INFO, server_configuration=None, **kwargs):
         super().__init__(
             account_configuration=AccountConfiguration(username, password),
             battle_format="gen1randombattle",
-            server_configuration=ShowdownServerConfiguration,
+            server_configuration=server_configuration or ShowdownServerConfiguration,
             max_concurrent_battles=max_concurrent_battles,
             log_level=log_level,
             **kwargs
@@ -30,9 +30,14 @@ class Gen1WarriorPlayer(Player):
         self.turn_counter = 0
         self._battle_metrics = self._empty_metrics()
         self._username = username
+        self._recent_actions = []  # Track recent actions to discourage excessive switching
 
-        if path.exists('./data/battle_records.csv'):
-            self._training_data = pd.read_csv('./data/battle_records.csv', index_col=False)
+        # Write to own CSV, but read from combined CSV
+        self._write_csv = f'./data/battle_records_{username}.csv'
+        self._read_csv = './data/battle_records_combined.csv'
+
+        if path.exists(self._read_csv):
+            self._training_data = pd.read_csv(self._read_csv, index_col=False)
             n_neighbors = max(1, math.floor(math.sqrt(self._training_data.shape[0])))
             self._knner = KNeighborsRegressor(n_neighbors=n_neighbors).fit(
                 self._training_data[['self_hp', 'opp_hp', 'outspeed_prob',
@@ -41,9 +46,11 @@ class Gen1WarriorPlayer(Player):
                 self._training_data.actual_npw_score
             )
             self._knnpred = lambda df: self._knner.predict(df)[0]
+            print(f"Loaded {len(self._training_data)} training records from {self._read_csv}")
         else:
             self._training_data = pd.DataFrame()
             self._knnpred = lambda df: 0
+            print("No training data found, starting fresh")
 
     def _empty_metrics(self):
         return {k: [] for k in ['turn', 'action', 'self_hp', 'opp_hp', 'outspeed_prob',
@@ -59,6 +66,9 @@ class Gen1WarriorPlayer(Player):
             return self.choose_random_move(battle)
 
         action_metrics = [self._get_action_metrics(battle, a) for a in actions]
+
+        # Apply switch penalty to discourage excessive switching
+        action_metrics = self._apply_switch_penalty(action_metrics)
 
         print("\nCHOICES:")
         for idx, m in enumerate(action_metrics):
@@ -268,6 +278,23 @@ class Gen1WarriorPlayer(Player):
 
         return min(max_damage / (target.max_hp or 100), 1.0)
 
+    def _apply_switch_penalty(self, action_metrics):
+        """Apply penalty to switch actions based on recent switching frequency"""
+        # Look at last 4 actions
+        recent_switches = sum(1 for action in self._recent_actions[-4:] if action.startswith('switch_'))
+
+        if recent_switches == 0:
+            return action_metrics
+
+        # Apply exponential penalty: 0 recent switches = no penalty, 4 recent switches = huge penalty
+        switch_penalty = 0.3 * (2 ** recent_switches)
+
+        for m in action_metrics:
+            if m.get('is_switch', False):
+                m['predicted_npw_score'] -= switch_penalty
+
+        return action_metrics
+
     def _record_action(self, m):
         self._battle_metrics['turn'].append(self.turn_counter)
         self._battle_metrics['action'].append(m['action_name'])
@@ -278,6 +305,12 @@ class Gen1WarriorPlayer(Player):
         self._battle_metrics['exp_damage_done'].append(m['exp_damage_done'])
         self._battle_metrics['exp_damage_received'].append(m['exp_damage_received'])
         self._battle_metrics['predicted_npw_score'].append(m['predicted_npw_score'])
+
+        # Track recent actions for switch penalty calculation
+        action_type = 'switch_' + m['action_name'] if m.get('is_switch', False) else 'move_' + m['action_name']
+        self._recent_actions.append(action_type)
+        if len(self._recent_actions) > 6:  # Keep last 6 actions
+            self._recent_actions.pop(0)
 
     def _battle_finished_callback(self, battle):
         won = battle.won
@@ -293,9 +326,13 @@ class Gen1WarriorPlayer(Player):
                 for t in self._battle_metrics['turn']
             ]
             battle_frame = pd.DataFrame.from_dict(self._battle_metrics)
-            all_data = pd.concat([battle_frame, self._training_data], ignore_index=True, sort=False)
-            all_data.to_csv('./data/battle_records.csv', index=False)
-            print(f"Saved {len(all_data)} records")
+            # Only save this battle's data to the bot's own CSV
+            battle_frame.to_csv(self._write_csv, index=False)
+            print(f"Saved {len(battle_frame)} battle records to {self._write_csv}")
 
         self._battle_metrics = self._empty_metrics()
         self.turn_counter = 0
+        self._recent_actions = []  # Reset recent actions for next battle
+
+        # Call parent's callback to properly handle battle completion
+        super()._battle_finished_callback(battle)
