@@ -67,12 +67,13 @@ class Gen1WarriorPlayer(Player):
 
         action_metrics = [self._get_action_metrics(battle, a) for a in actions]
 
-        # Apply switch penalty to discourage excessive switching
-        action_metrics = self._apply_switch_penalty(action_metrics)
+        # Create adjusted scores for decision-making (with switch penalty)
+        # but keep original predictions for training data
+        adjusted_metrics = self._apply_switch_penalty(action_metrics)
 
         print("\nCHOICES:")
-        for idx, m in enumerate(action_metrics):
-            print(f"  {idx + 1}: {m['action_name']} (score: {m['predicted_npw_score']:.3f})")
+        for idx, m in enumerate(adjusted_metrics):
+            print(f"  {idx + 1}: {m['action_name']} (score: {m['adjusted_score']:.3f})")
 
         if self.training_mode:
             print("")
@@ -83,9 +84,11 @@ class Gen1WarriorPlayer(Player):
                 selected_idx = 0
             selected = action_metrics[selected_idx]
         else:
-            max_score = max(m['predicted_npw_score'] for m in action_metrics)
-            best = [m for m in action_metrics if m['predicted_npw_score'] == max_score]
-            selected = random.choice(best)
+            max_score = max(m['adjusted_score'] for m in adjusted_metrics)
+            best = [m for m in adjusted_metrics if m['adjusted_score'] == max_score]
+            selected_adjusted = random.choice(best)
+            # Find the original (unadjusted) version of this action
+            selected = next(m for m in action_metrics if m['action_name'] == selected_adjusted['action_name'])
             time.sleep(1.5)
 
         self._record_action(selected)
@@ -200,7 +203,7 @@ class Gen1WarriorPlayer(Player):
             if bp == 0:
                 return 0.0
 
-            acc = move_data.get('accuracy', 100) / 100 if 'accuracy' in move_data else 1.0
+            accuracy = move_data.get('accuracy', 100) / 100 if 'accuracy' in move_data else 1.0
             move_type = move.type.name if move.type else 'Normal'
             special_types = ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']
 
@@ -214,15 +217,19 @@ class Gen1WarriorPlayer(Player):
                 opp_base_def = gen1_mons_dict.get(opp_species, {}).get('bs', {}).get('def', 80)
 
             def_stat = math.floor(((opp_base_def + 15) * 2 + 63) * opp_mon.level / 100) + 5
-            damage = ((2 * my_mon.level / 5 + 2) * bp * acc * atk_stat / def_stat / 50 + 2) * 236 / 255
+            # Gen 1 damage formula (using 236/255 as average random roll)
+            base_damage = ((2 * my_mon.level / 5 + 2) * bp * atk_stat / def_stat / 50 + 2) * 236 / 255
 
             my_types = [t.name for t in my_mon.types if t]
             if move_type in my_types:
-                damage *= 1.5
+                base_damage *= 1.5  # STAB
 
             opp_types = [t.name for t in opp_mon.types if t]
             for ot in opp_types:
-                damage *= type_effectiveness_dict.get(move_type, {}).get(ot, 1)
+                base_damage *= type_effectiveness_dict.get(move_type, {}).get(ot, 1)
+
+            # Expected damage = accuracy * base_damage
+            damage = accuracy * base_damage
 
         opp_species = opp_mon.species.replace('-', '').replace(' ', '').title()
         opp_base_hp = gen1_mons_dict.get(opp_species, {}).get('bs', {}).get('hp', 80)
@@ -251,7 +258,7 @@ class Gen1WarriorPlayer(Player):
             if bp == 0:
                 continue
 
-            acc = move_data.get('accuracy', 100) / 100 if 'accuracy' in move_data else 1.0
+            accuracy = move_data.get('accuracy', 100) / 100 if 'accuracy' in move_data else 1.0
             move_type = move.type.name if move.type else 'Normal'
             special_types = ['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark']
 
@@ -264,36 +271,47 @@ class Gen1WarriorPlayer(Player):
                 def_stat = target.stats.get('def', 80) if target.stats else 80
 
             atk_stat = math.floor(((opp_base_atk + 15) * 2 + 63) * opp_mon.level / 100) + 5
-            damage = ((2 * opp_mon.level / 5 + 2) * bp * acc * atk_stat / def_stat / 50 + 2) * 236 / 255
+            # Gen 1 damage formula (using 236/255 as average random roll)
+            base_damage = ((2 * opp_mon.level / 5 + 2) * bp * atk_stat / def_stat / 50 + 2) * 236 / 255
 
             opp_types = [t.name for t in opp_mon.types if t]
             if move_type in opp_types:
-                damage *= 1.5
+                base_damage *= 1.5  # STAB
 
             target_types = [t.name for t in target.types if t]
             for tt in target_types:
-                damage *= type_effectiveness_dict.get(move_type, {}).get(tt, 1)
+                base_damage *= type_effectiveness_dict.get(move_type, {}).get(tt, 1)
+
+            # Expected damage = accuracy * base_damage
+            damage = accuracy * base_damage
 
             max_damage = max(max_damage, damage)
 
         return min(max_damage / (target.max_hp or 100), 1.0)
 
     def _apply_switch_penalty(self, action_metrics):
-        """Apply penalty to switch actions based on recent switching frequency"""
+        """Apply penalty to switch actions based on recent switching frequency
+
+        Returns metrics with 'adjusted_score' for decision-making, preserving
+        original 'predicted_npw_score' for training data.
+        """
         # Look at last 4 actions
         recent_switches = sum(1 for action in self._recent_actions[-4:] if action.startswith('switch_'))
 
-        if recent_switches == 0:
-            return action_metrics
-
-        # Apply exponential penalty: 0 recent switches = no penalty, 4 recent switches = huge penalty
-        switch_penalty = 0.3 * (2 ** recent_switches)
-
+        # Create adjusted versions with penalty applied
+        adjusted = []
         for m in action_metrics:
-            if m.get('is_switch', False):
-                m['predicted_npw_score'] -= switch_penalty
+            m_copy = m.copy()
+            m_copy['adjusted_score'] = m['predicted_npw_score']
 
-        return action_metrics
+            if recent_switches > 0 and m.get('is_switch', False):
+                # Apply exponential penalty: 0 recent switches = no penalty, 4 recent switches = huge penalty
+                switch_penalty = 0.3 * (2 ** recent_switches)
+                m_copy['adjusted_score'] -= switch_penalty
+
+            adjusted.append(m_copy)
+
+        return adjusted
 
     def _record_action(self, m):
         self._battle_metrics['turn'].append(self.turn_counter)
