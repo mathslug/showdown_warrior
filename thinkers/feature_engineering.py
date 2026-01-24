@@ -16,7 +16,7 @@ from general_poke_data import gen1_mons_dict, gen1_moves_dict, type_effectivenes
 
 
 # Types that use Special stat in Gen 1
-SPECIAL_TYPES = frozenset(['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric'])
+SPECIAL_TYPES = frozenset(['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark'])
 
 # Feature columns used by all thinkers
 FEATURE_COLS = ['self_hp', 'opp_hp', 'outspeed_prob', 'is_status_move',
