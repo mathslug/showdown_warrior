@@ -38,6 +38,28 @@ if [ ! -f "./data/login.txt" ] || [ ! -f "./data/login2.txt" ]; then
     exit 1
 fi
 
+# If not inside tmux, restart script inside tmux
+if [ -z "$TMUX" ]; then
+    echo -e "${GREEN}Starting tmux session...${NC}"
+    exec tmux new-session -s "$SESSION_NAME" "$0" "$@"
+fi
+
+# Use current tmux session
+SESSION_NAME="$(tmux display-message -p '#S')"
+
+# Cleanup function - kill only the windows we created
+cleanup() {
+    echo ""
+    echo -e "${YELLOW}Stopping server and bots...${NC}"
+    tmux kill-window -t server 2>/dev/null || true
+    tmux kill-window -t bots 2>/dev/null || true
+    echo -e "${GREEN}Training session ended. Total battles: ${battle_count:-0}${NC}"
+    exit 0
+}
+
+# Trap Ctrl+C and other signals to ensure cleanup
+trap cleanup SIGINT SIGTERM
+
 BOT1_USERNAME=$(head -1 "./data/login.txt")
 BOT2_USERNAME=$(head -1 "./data/login2.txt")
 
@@ -115,11 +137,10 @@ wait_for_battle() {
     return 1
 }
 
-# Start tmux session with server window
+# Start server window
 echo -e "${GREEN}→ Starting Pokémon Showdown server...${NC}"
-tmux kill-session -t $SESSION_NAME 2>/dev/null || true
-tmux new-session -d -s $SESSION_NAME -n "server" -c "$SHOWDOWN_DIR" -x 180 -y 50
-tmux send-keys -t $SESSION_NAME:server "node pokemon-showdown start" C-m
+tmux new-window -n "server" -c "$SHOWDOWN_DIR"
+tmux send-keys -t server "node pokemon-showdown start" C-m
 echo -e "  Waiting for server to start..."
 sleep 8
 
@@ -144,20 +165,20 @@ while true; do
     rm -f "./data/battle_records_${BOT2_USERNAME}.csv"
 
     # Kill bots window if it exists, create new one
-    tmux kill-window -t $SESSION_NAME:bots 2>/dev/null || true
+    tmux kill-window -t bots 2>/dev/null || true
 
     # Start bots in a new window
     echo -e "${GREEN}→ Starting bots...${NC}"
-    tmux new-window -t $SESSION_NAME -n "bots" -c "$BOT_DIR"
+    tmux new-window -n "bots" -c "$BOT_DIR"
 
     # Bot 1 (accepts challenges)
-    tmux send-keys -t $SESSION_NAME:bots "uv run python start_warrior.py --local -c data/login.txt" C-m
+    tmux send-keys -t bots "uv run python start_warrior.py --local -c data/login.txt" C-m
 
     sleep 3
 
     # Bot 2 (sends challenges) - split the bots window
-    tmux split-window -h -t $SESSION_NAME:bots -c "$BOT_DIR"
-    tmux send-keys -t $SESSION_NAME:bots "uv run python start_warrior.py --local -c data/login2.txt --challenge $BOT1_USERNAME" C-m
+    tmux split-window -h -t bots -c "$BOT_DIR"
+    tmux send-keys -t bots "uv run python start_warrior.py --local -c data/login2.txt --challenge $BOT1_USERNAME" C-m
 
     # Wait for battle to complete
     if ! wait_for_battle; then
@@ -167,7 +188,7 @@ while true; do
 
     # Stop the bots (kill the bots window, keep server running)
     echo -e "${GREEN}→ Stopping bots...${NC}"
-    tmux kill-window -t $SESSION_NAME:bots 2>/dev/null || true
+    tmux kill-window -t bots 2>/dev/null || true
 
     echo -e "${GREEN}✓ Battle #${battle_count} complete${NC}"
 
@@ -175,9 +196,5 @@ while true; do
     sleep 2
 done
 
-# Cleanup
-echo ""
-echo -e "${YELLOW}Stopping server and bots...${NC}"
-tmux kill-session -t $SESSION_NAME 2>/dev/null || true
-
-echo -e "${GREEN}Training session ended. Total battles: ${battle_count}${NC}"
+# Run cleanup on normal exit too
+cleanup
