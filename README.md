@@ -82,6 +82,10 @@ The following Gen 1 mechanics are not yet modeled in feature engineering:
 - [ ] Explosion / Self-Destruct (user fainting cost)
 - [ ] Critical hit modeling (speed-based crit rates in Gen 1)
 
+I would like integration testing to be easier than just running a continuous battle for a while. We should test both training and self-driving modes automatically, with a repeatable seed, and have unit tests, especially for the engineered features.
+
+Finally, the end product will be to analyze how the bots change over time as they accumulate data. This will involve win rate over time as they battle each other.
+
 ## Ethics
 
 This bot is intended for testing and research. Do not use it to challenge random players on the official Pokemon Showdown server. For large-scale training or continuous testing, host your own Showdown instance.
