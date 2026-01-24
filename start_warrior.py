@@ -11,6 +11,7 @@ Options:
     --debug             Enable debug logging
     --rando             Search for random battles on ladder
     --challenge NAME    Challenge a specific player
+    --method METHOD     ML method to use (knn, gb). Default: knn
     -c, --credentials   Path to credentials file (default: ./data/login.txt)
 """
 import asyncio
@@ -53,13 +54,20 @@ async def main():
     else:
         raise Exception(f'Credentials file not found: {credentials_file}')
 
+    # Parse ML method (default: knn)
+    ml_method = 'knn'
+    if '--method' in sys.argv:
+        idx = sys.argv.index('--method')
+        if idx + 1 < len(sys.argv):
+            ml_method = sys.argv[idx + 1]
+
     # Determine server configuration
     server_config = None
     if '--local' in sys.argv:
         server_config = LocalhostServerConfiguration
-        print(f"Starting as {username} on LOCAL server...")
+        print(f"Starting as {username} on LOCAL server (method: {ml_method})...")
     else:
-        print(f"Starting as {username} on OFFICIAL server...")
+        print(f"Starting as {username} on OFFICIAL server (method: {ml_method})...")
 
     # Create the player
     player = Gen1WarriorPlayer(
@@ -68,6 +76,7 @@ async def main():
         training_mode='--train' in sys.argv,
         log_level=log_level,
         server_configuration=server_config,
+        ml_method=ml_method,
     )
 
     # Handle challenge mode

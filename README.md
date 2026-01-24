@@ -1,57 +1,90 @@
 # showdown_warrior
 
-showdown_warrior learns how to play Pokémon Showdown. It's a modular tool for experimenting with machine learning and decision-making strategies in Pokémon Showdown.
+showdown_warrior is a framework for exploring how different machine learning methods can learn to play Pokemon Showdown using a low-dimensional approximation of battle state.
 
-It provides a clean interface to the Showdown API, handles authentication and connection recovery, and allows you to rapidly prototype and test AI agents that learn as they battle.
+## Motivation
 
-## Overview
+Pokemon battles have complex, high-dimensional state spaces: six Pokemon per side, four moves each, stats, items, abilities, weather, entry hazards, and more. Traditional deep learning approaches would encode this full state and learn end-to-end.
 
-This project isn’t a single “best” algorithm—it’s a framework for exploring how different ML and heuristic methods perform in Pokémon Showdown battles.
-You can customize how the bot perceives game state, what data it tracks, and how it decides the next move. You can have the bot learn by itself, or have the bot watch you and learn your playstyle.
+This project takes a different approach: we hand-craft a small set of features that capture the essence of a battle decision, then compare how various ML methods learn from this compressed representation. The current feature set includes:
 
-**Goals**
+- `self_hp` / `opp_hp` - HP fractions
+- `outspeed_prob` - probability of moving first
+- `is_status_move` - status effect probability
+- `exp_damage_done` / `exp_damage_received` - expected damage exchange
 
-- Modular architecture: swap out decision modules or data trackers easily.
+This low-dimensional approach lets us:
+- Train quickly with limited data
+- Compare classical ML methods (KNN, gradient boosting, etc.) directly
+- Understand what the model is learning
 
-- Self-play and online learning: agents can learn from matches against themselves or human players.
+In the future, this could be extended to methods that work in high dimensions, taking a more traditional deep learning approach with raw state encoding.
 
-- Robust integration: automatically reconnects and syncs with the Showdown API after dropped connections.
+## Available ML Methods
 
-- Safe experimentation: intended for testing and research, not online farming or spam battles. Do not use this bot to challenge random players on the official Pokémon Showdown server. For large-scale training or continuous testing, please host your own Showdown instance.
+- `knn` - K-Nearest Neighbors (default)
+- `gb` - Gradient Boosting
+
+Select via the `--method` flag or when running continuous battles.
 
 ## Setup
 
-* git clone this repository and cd into it
+1. Clone this repository and cd into it
 
-* save showdown credentials in `./data/login.txt` as:
+2. Save Showdown credentials in `./data/login.txt`:
+   ```
+   username
+   password
+   ```
 
+3. Install dependencies:
+   ```bash
+   poetry install
+   # or: uv sync
+   ```
+
+4. Run the bot:
+   ```bash
+   poetry run python start_warrior.py
+   # or: uv run python start_warrior.py
+   ```
+
+## Continuous Training
+
+For self-play training that accumulates data across battles:
+
+```bash
+# Both bots use KNN (default)
+./continuous_battles.sh
+
+# Bot 1 uses gradient boosting, bot 2 uses KNN
+./continuous_battles.sh gb knn
 ```
-username
-password
-```
 
-* recommended: activate a virtualenv. I use poetry.
+This runs battles in tmux, combining training data between rounds.
 
-* `poetry install`
+## Project Structure
 
-* `poetry run python start_warrior.py`
+- `start_warrior.py` - Entry point
+- `warrior_player.py` - Battle lifecycle and action selection
+- `thinkers/` - ML method implementations
+  - `feature_engineering.py` - Shared feature calculations
+  - `knn_thinker.py` - KNN implementation
+  - `gb_thinker.py` - Gradient boosting implementation
+- `continuous_battles.sh` - Self-play training script
 
-* you're done, go battle it on showdown
+## TODO
 
-* control-c to stop it
+The following Gen 1 mechanics are not yet modeled in feature engineering:
 
-## Customization
+- [ ] Multi-hit moves (Double Kick, Pin Missile, etc.)
+- [ ] Trapping moves (Wrap, Bind, Fire Spin)
+- [ ] Explosion / Self-Destruct (user fainting cost)
+- [ ] Critical hit modeling (speed-based crit rates in Gen 1)
 
-Core logic lives in thinker.py. You can modify or replace it to try different reinforcement learning methods, state representations or engineered features.
+## Ethics
 
-## Background
-
-A full write-up of the design and intent is available here:
-👉 https://mathslug.com/posts/showdown/
-
-## Future Work
-
-Add ability to support more generations of Pokémon.
+This bot is intended for testing and research. Do not use it to challenge random players on the official Pokemon Showdown server. For large-scale training or continuous testing, host your own Showdown instance.
 
 ## License
 

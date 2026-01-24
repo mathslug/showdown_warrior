@@ -20,7 +20,7 @@ from poke_env import AccountConfiguration, ShowdownServerConfiguration
 from poke_env.player import Player
 from poke_env.battle import Battle
 
-from battle_thinker import Gen1BattleThinker
+from thinkers import create_thinker
 
 
 class Gen1WarriorPlayer(Player):
@@ -34,6 +34,7 @@ class Gen1WarriorPlayer(Player):
         max_concurrent_battles: int = 5,
         log_level: int = logging.INFO,
         server_configuration=None,
+        ml_method: str = 'knn',
         **kwargs
     ):
         super().__init__(
@@ -48,12 +49,13 @@ class Gen1WarriorPlayer(Player):
         self.turn_counter = 0
         self._battle_metrics = self._empty_metrics()
         self._username = username
+        self._ml_method = ml_method
         self._recent_actions = []  # Track recent actions for switch penalty
 
-        # Initialize the thinker for calculations
-        self._thinker = Gen1BattleThinker(username)
+        # Initialize the thinker for calculations using the factory
+        self._thinker = create_thinker(username, method=ml_method)
 
-        # CSV paths for training data
+        # CSV path for training data - per-bot file that gets combined
         self._write_csv = f'./data/battle_records_{username}.csv'
 
     def _empty_metrics(self) -> dict:

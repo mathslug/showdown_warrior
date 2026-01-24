@@ -15,7 +15,10 @@ NC='\033[0m' # No Color
 SHOWDOWN_DIR="../pokemon-showdown"
 BOT_DIR="$(pwd)"
 SESSION_NAME="showdown_battle"
-COMBINED_CSV="./data/battle_records_combined.csv"
+
+# ML methods for each bot (default: knn)
+METHOD1="${1:-knn}"
+METHOD2="${2:-knn}"
 
 # Check dependencies
 if ! command -v tmux &> /dev/null; then
@@ -69,41 +72,42 @@ echo -e "${BLUE}╔════════════════════�
 echo -e "${BLUE}║  Continuous Pokémon Showdown Training Mode   ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "Bot 1: ${YELLOW}$BOT1_USERNAME${NC} (accepts challenges)"
-echo -e "Bot 2: ${YELLOW}$BOT2_USERNAME${NC} (sends challenges)"
+echo -e "Bot 1: ${YELLOW}$BOT1_USERNAME${NC} (accepts challenges) - Method: ${YELLOW}$METHOD1${NC}"
+echo -e "Bot 2: ${YELLOW}$BOT2_USERNAME${NC} (sends challenges) - Method: ${YELLOW}$METHOD2${NC}"
 echo ""
 
 # Function to combine CSV files
 combine_csvs() {
     local bot1_csv="./data/battle_records_${BOT1_USERNAME}.csv"
     local bot2_csv="./data/battle_records_${BOT2_USERNAME}.csv"
+    local combined_csv="./data/battle_records_combined.csv"
 
     echo -e "${GREEN}→ Combining training data...${NC}"
 
     # If combined file exists, start with it
-    if [ -f "$COMBINED_CSV" ]; then
-        cp "$COMBINED_CSV" "${COMBINED_CSV}.tmp"
+    if [ -f "$combined_csv" ]; then
+        cp "$combined_csv" "${combined_csv}.tmp"
     else
         # Create empty file with header
-        echo "turn,action,self_hp,opp_hp,outspeed_prob,is_status_move,exp_damage_done,exp_damage_received,predicted_npw_score,actual_npw_score" > "${COMBINED_CSV}.tmp"
+        echo "turn,action,self_hp,opp_hp,outspeed_prob,is_status_move,exp_damage_done,exp_damage_received,predicted_npw_score,actual_npw_score" > "${combined_csv}.tmp"
     fi
 
     # Append new data from bot CSVs (skip headers)
     if [ -f "$bot1_csv" ]; then
-        tail -n +2 "$bot1_csv" >> "${COMBINED_CSV}.tmp"
+        tail -n +2 "$bot1_csv" >> "${combined_csv}.tmp"
         echo -e "  Added $(tail -n +2 "$bot1_csv" | wc -l | xargs) records from $BOT1_USERNAME"
         rm "$bot1_csv"
     fi
 
     if [ -f "$bot2_csv" ]; then
-        tail -n +2 "$bot2_csv" >> "${COMBINED_CSV}.tmp"
+        tail -n +2 "$bot2_csv" >> "${combined_csv}.tmp"
         echo -e "  Added $(tail -n +2 "$bot2_csv" | wc -l | xargs) records from $BOT2_USERNAME"
         rm "$bot2_csv"
     fi
 
-    mv "${COMBINED_CSV}.tmp" "$COMBINED_CSV"
+    mv "${combined_csv}.tmp" "$combined_csv"
 
-    local total_records=$(($(wc -l < "$COMBINED_CSV") - 1))
+    local total_records=$(($(wc -l < "$combined_csv") - 1))
     echo -e "  ${GREEN}Total training records: $total_records${NC}"
 }
 
@@ -173,14 +177,14 @@ while true; do
     echo -e "${GREEN}→ Starting bots...${NC}"
     tmux new-window -n "bots" -c "$BOT_DIR"
 
-    # Bot 1 (accepts challenges)
-    tmux send-keys -t bots "uv run python start_warrior.py --local -c data/login.txt" C-m
+    # Bot 1 (accepts challenges) - uses METHOD1
+    tmux send-keys -t bots "uv run python start_warrior.py --local -c data/login.txt --method $METHOD1" C-m
 
     sleep 3
 
-    # Bot 2 (sends challenges) - split the bots window
+    # Bot 2 (sends challenges) - uses METHOD2
     tmux split-window -h -t bots -c "$BOT_DIR"
-    tmux send-keys -t bots "uv run python start_warrior.py --local -c data/login2.txt --challenge $BOT1_USERNAME" C-m
+    tmux send-keys -t bots "uv run python start_warrior.py --local -c data/login2.txt --challenge $BOT1_USERNAME --method $METHOD2" C-m
 
     # Switch back to controller window while battle runs
     tmux select-window -t controller
