@@ -46,6 +46,8 @@ fi
 
 # Use current tmux session
 SESSION_NAME="$(tmux display-message -p '#S')"
+# Name the main controller window
+tmux rename-window -t . "controller"
 
 # Cleanup function - kill only the windows we created
 cleanup() {
@@ -179,6 +181,9 @@ while true; do
     # Bot 2 (sends challenges) - split the bots window
     tmux split-window -h -t bots -c "$BOT_DIR"
     tmux send-keys -t bots "uv run python start_warrior.py --local -c data/login2.txt --challenge $BOT1_USERNAME" C-m
+
+    # Switch back to controller window while battle runs
+    tmux select-window -t controller
 
     # Wait for battle to complete
     if ! wait_for_battle; then
