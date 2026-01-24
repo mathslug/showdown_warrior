@@ -89,7 +89,7 @@ combine_csvs() {
         cp "$combined_csv" "${combined_csv}.tmp"
     else
         # Create empty file with header
-        echo "turn,action,self_hp,opp_hp,outspeed_prob,is_status_move,exp_damage_done,exp_damage_received,predicted_npw_score,actual_npw_score" > "${combined_csv}.tmp"
+        echo "turn,action,self_hp,opp_hp,outspeed_prob,is_status_move,exp_damage_done,exp_damage_received,predicted_npw_score,ml_method,actual_npw_score" > "${combined_csv}.tmp"
     fi
 
     # Append new data from bot CSVs (skip headers)

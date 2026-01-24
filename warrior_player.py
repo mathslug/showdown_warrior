@@ -63,7 +63,7 @@ class Gen1WarriorPlayer(Player):
         return {k: [] for k in [
             'turn', 'action', 'self_hp', 'opp_hp', 'outspeed_prob',
             'is_status_move', 'exp_damage_done', 'exp_damage_received',
-            'predicted_npw_score'
+            'predicted_npw_score', 'ml_method'
         ]}
 
     def choose_move(self, battle: Battle):
@@ -157,6 +157,7 @@ class Gen1WarriorPlayer(Player):
         self._battle_metrics['exp_damage_done'].append(metrics['exp_damage_done'])
         self._battle_metrics['exp_damage_received'].append(metrics['exp_damage_received'])
         self._battle_metrics['predicted_npw_score'].append(metrics['predicted_npw_score'])
+        self._battle_metrics['ml_method'].append('human' if self.training_mode else self._ml_method)
 
         # Track for switch penalty
         action_type = 'switch_' + metrics['action_name'] if metrics.get('is_switch', False) else 'move_' + metrics['action_name']
