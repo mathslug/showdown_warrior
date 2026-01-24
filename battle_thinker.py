@@ -322,7 +322,14 @@ class Gen1BattleThinker:
 
         # Calculate as fraction of opponent's max HP
         opp_max_hp = self._get_opponent_max_hp(opp_mon)
-        return min(damage / opp_max_hp, 1.0)
+        damage_fraction = damage / opp_max_hp
+
+        # Add opponent's expected self-confusion damage (they hit themselves 50% of the time)
+        if self._is_confused(opp_mon):
+            opp_self_damage = self._get_confusion_self_damage_opponent(opp_mon)
+            damage_fraction += 0.5 * opp_self_damage / opp_max_hp
+
+        return min(damage_fraction, 1.0)
 
     def _get_damage_received(self, battle: Battle, action: tuple) -> float:
         """
@@ -433,7 +440,16 @@ class Gen1BattleThinker:
             max_damage = max(max_damage, damage)
 
         target_max_hp = target.max_hp if target.max_hp else 100
-        return min(max_damage / target_max_hp, 1.0)
+        damage_fraction = max_damage / target_max_hp
+
+        # Add our expected self-confusion damage (we hit ourselves 50% of the time when confused)
+        # Use the mon that will be attacking (my_mon for moves, but for switches we still
+        # need to consider if my_mon is confused and will attack before switching completes)
+        if action_type != 'switch' and self._is_confused(my_mon):
+            self_damage = self._get_confusion_self_damage(my_mon)
+            damage_fraction += 0.5 * self_damage / (my_mon.max_hp if my_mon.max_hp else 100)
+
+        return min(damage_fraction, 1.0)
 
     # ==================== Helper Methods ====================
 
@@ -548,6 +564,49 @@ class Gen1BattleThinker:
         if pokemon.effects:
             return Effect.CONFUSION in pokemon.effects
         return False
+
+    def _get_confusion_self_damage(self, pokemon: Pokemon) -> float:
+        """
+        Calculate the damage a Pokemon deals to itself when hitting itself in confusion.
+
+        In Gen 1, confusion self-hit is a 40 BP typeless physical attack
+        using the Pokemon's Attack vs its own Defense.
+
+        Returns damage as a raw value (not fraction of HP).
+        """
+        # 40 BP typeless attack
+        bp = 40
+
+        # Get Attack and Defense stats with modifiers
+        atk_stat = self._get_stat_with_mods(pokemon, 'atk', is_own_pokemon=True)
+        def_stat = self._get_stat_with_mods(pokemon, 'def', is_own_pokemon=True)
+
+        # Gen 1 damage formula (no STAB, no type effectiveness for confusion)
+        damage = ((2 * pokemon.level / 5 + 2) * bp * atk_stat / def_stat / 50 + 2)
+        damage *= 236 / 255  # Average random roll
+
+        return damage
+
+    def _get_confusion_self_damage_opponent(self, opp_mon: Pokemon) -> float:
+        """
+        Calculate the damage an opponent Pokemon deals to itself in confusion.
+
+        Same as _get_confusion_self_damage but uses estimated opponent stats.
+
+        Returns damage as a raw value (not fraction of HP).
+        """
+        # 40 BP typeless attack
+        bp = 40
+
+        # Get opponent's Attack and Defense stats (estimated)
+        atk_stat = self._get_opponent_atk_stat(opp_mon, 'atk')
+        def_stat = self._get_opponent_def_stat(opp_mon, 'def')
+
+        # Gen 1 damage formula (no STAB, no type effectiveness for confusion)
+        damage = ((2 * opp_mon.level / 5 + 2) * bp * atk_stat / def_stat / 50 + 2)
+        damage *= 236 / 255  # Average random roll
+
+        return damage
 
     def _normalize_species_name(self, species: str) -> str:
         """Normalize species name to match gen1_mons_dict keys."""
