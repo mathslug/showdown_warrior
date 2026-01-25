@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-
 def analyze_battles():
     """Load battle data and create cumulative wins visualization."""
     # Load the data
@@ -26,13 +25,11 @@ def analyze_battles():
     # Create the plot
     plt.figure(figsize=(12, 6))
 
-    if len(knn_wins) > 0:
-        plt.plot(knn_wins['position'], knn_wins['cumulative_wins'],
-                 label='KNN', linewidth=2, marker='o', markersize=3)
+    plt.plot(knn_wins['position'], knn_wins['cumulative_wins'],
+                label='KNN', linewidth=2, marker='o', markersize=3)
 
-    if len(gb_wins) > 0:
-        plt.plot(gb_wins['position'], gb_wins['cumulative_wins'],
-                 label='Gradient Boosting', linewidth=2, marker='s', markersize=3)
+    plt.plot(gb_wins['position'], gb_wins['cumulative_wins'],
+                label='Gradient Boosting', linewidth=2, marker='s', markersize=3)
 
     plt.xlabel('Battle Progression', fontsize=12)
     plt.ylabel('Cumulative Wins', fontsize=12)

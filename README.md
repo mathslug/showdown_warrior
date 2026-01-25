@@ -4,7 +4,7 @@ showdown_warrior is a framework for exploring how different machine learning met
 
 ## Motivation
 
-Pokemon battles have complex, high-dimensional state spaces: six Pokemon per side, four moves each, stats, items, abilities, weather, entry hazards, and more. Traditional deep learning approaches would encode this full state and learn end-to-end.
+Pokemon battles have complex, high-dimensional state spaces. Traditional deep learning approaches would encode this full state, including perhaps history, and learn end-to-end.
 
 This project takes a different approach: we hand-craft a small set of features that capture the essence of a (gen 1) battle decision, intentionally leaving out subtleties, then compare how various ML methods learn from this compressed representation, and what bits of strategy they are able to pick up. The current feature set includes:
 
@@ -25,7 +25,7 @@ In the future, this could be extended to methods that work in high dimensions, t
 - `knn` - K-Nearest Neighbors (default)
 - `gb` - Gradient Boosting
 
-Select via the `--method` flag or when running continuous battles.
+Select via the `--method` flag.
 
 ## Setup
 
@@ -39,14 +39,12 @@ Select via the `--method` flag or when running continuous battles.
 
 3. Install dependencies:
    ```bash
-   poetry install
-   # or: uv sync
+   uv sync
    ```
 
 4. Run the bot:
    ```bash
-   poetry run python start_warrior.py
-   # or: uv run python start_warrior.py
+   uv run python start_warrior.py
    ```
 
 ## Continuous Training
@@ -61,7 +59,7 @@ For self-play training that accumulates data across battles:
 ./continuous_battles.sh gb knn
 ```
 
-This runs battles in tmux, combining training data between rounds.
+This runs battles in tmux, combining training data between rounds. It assumes you also have pokemon-showdown itself saved in the parent directory of this directory.
 
 ## Project Structure
 
@@ -75,13 +73,11 @@ This runs battles in tmux, combining training data between rounds.
 
 ## TODO
 
-The following Gen 1 mechanics are not yet modeled in feature engineering:
-
-- [ ] Critical hit modeling (speed-based crit rates in Gen 1)
+Critical hit modeling (speed-based crit rates in Gen 1) is not implemented.
 
 I would like integration testing to be easier than just running a continuous battle for a while. We should test both training and self-driving modes automatically, with a repeatable seed, and have unit tests, especially for the engineered features.
 
-I would also like to analyze what types of tactics the bots can learn from the condensed feature set, in addition to just tracking win rate for different models.
+I would also like to analyze what types of tactics the bots can learn from the condensed feature set, in addition to just tracking win rate for different models. I expect the bots to at least be able to learn that going for the KO when available is usually a good strategy, as well as avoiding known immediate KO risks. I expect GB to be able to learn this more quickly (see below).
 
 ## Ethics
 
