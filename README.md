@@ -6,7 +6,7 @@ showdown_warrior is a framework for exploring how different machine learning met
 
 Pokemon battles have complex, high-dimensional state spaces: six Pokemon per side, four moves each, stats, items, abilities, weather, entry hazards, and more. Traditional deep learning approaches would encode this full state and learn end-to-end.
 
-This project takes a different approach: we hand-craft a small set of features that capture the essence of a battle decision, then compare how various ML methods learn from this compressed representation. The current feature set includes:
+This project takes a different approach: we hand-craft a small set of features that capture the essence of a (gen 1) battle decision, intentionally leaving out subtleties, then compare how various ML methods learn from this compressed representation, and what bits of strategy they are able to pick up. The current feature set includes:
 
 - `self_hp` / `opp_hp` - HP fractions
 - `outspeed_prob` - probability of moving first
@@ -77,18 +77,21 @@ This runs battles in tmux, combining training data between rounds.
 
 The following Gen 1 mechanics are not yet modeled in feature engineering:
 
-- [ ] Multi-hit moves (Double Kick, Pin Missile, etc.)
-- [ ] Trapping moves (Wrap, Bind, Fire Spin)
-- [ ] Explosion / Self-Destruct (user fainting cost)
 - [ ] Critical hit modeling (speed-based crit rates in Gen 1)
 
 I would like integration testing to be easier than just running a continuous battle for a while. We should test both training and self-driving modes automatically, with a repeatable seed, and have unit tests, especially for the engineered features.
 
-Finally, the end product will be to analyze how the bots change over time as they accumulate data. This will involve win rate over time as they battle each other.
+I would also like to analyze what types of tactics the bots can learn from the condensed feature set, in addition to just tracking win rate for different models.
 
 ## Ethics
 
 This bot is intended for testing and research. Do not use it to challenge random players on the official Pokemon Showdown server. For large-scale training or continuous testing, host your own Showdown instance.
+
+## Analysis
+
+The following graph shows cumulative wins over time for the KNN and Gradient Boosting methods over time, playing against each other. It suggests that GB might have gained a slight edge over KNN on the limited feature set, but more data is needed to conclude that it has truly pulled away.
+
+![Cumulative Wins Over Time](./cumulative_wins.png)
 
 ## License
 

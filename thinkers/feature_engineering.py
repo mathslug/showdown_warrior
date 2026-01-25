@@ -18,6 +18,10 @@ from general_poke_data import gen1_mons_dict, gen1_moves_dict, type_effectivenes
 # Types that use Special stat in Gen 1
 SPECIAL_TYPES = frozenset(['Grass', 'Psychic', 'Ice', 'Water', 'Dragon', 'Fire', 'Electric', 'Dark'])
 
+# Gen 1 partial-trapping moves (opponent cannot act while trapped)
+GEN1_TRAPPING_MOVES = frozenset({'wrap', 'bind', 'firespin', 'clamp'})
+EXPECTED_TRAP_TURNS = 3.0
+
 # Feature columns used by all thinkers
 FEATURE_COLS = ['self_hp', 'opp_hp', 'outspeed_prob', 'is_status_move',
                 'exp_damage_done', 'exp_damage_received']
@@ -242,6 +246,9 @@ def _get_damage_done(battle: Battle, action: tuple) -> float:
             if _opponent_has_screen(battle, 'reflect'):
                 def_stat *= 2
 
+        if move.id in ('explosion', 'selfdestruct'):
+            def_stat /= 2
+
         damage = ((2 * my_mon.level / 5 + 2) * bp * atk_stat / def_stat / 50 + 2)
         damage *= 236 / 255
 
@@ -262,6 +269,11 @@ def _get_damage_done(battle: Battle, action: tuple) -> float:
         if _is_confused(my_mon):
             damage *= 0.5
 
+        damage *= move.expected_hits
+
+        if move.id in GEN1_TRAPPING_MOVES:
+            damage *= EXPECTED_TRAP_TURNS
+
     opp_max_hp = _get_opponent_max_hp(opp_mon)
     damage_fraction = damage / opp_max_hp
 
@@ -269,7 +281,7 @@ def _get_damage_done(battle: Battle, action: tuple) -> float:
         opp_self_damage = _get_confusion_self_damage_opponent(opp_mon)
         damage_fraction += 0.5 * opp_self_damage / opp_max_hp
 
-    return min(damage_fraction, 1.0)
+    return min(damage_fraction, opp_mon.current_hp_fraction)
 
 
 def _get_damage_received(battle: Battle, action: tuple) -> float:
@@ -285,6 +297,9 @@ def _get_damage_received(battle: Battle, action: tuple) -> float:
 
     if not my_mon or not opp_mon:
         return 0.0
+
+    if action_type == 'move' and action_obj.id in ('explosion', 'selfdestruct'):
+        return my_mon.current_hp_fraction if my_mon else 1.0
 
     if opp_mon.status in (Status.SLP, Status.FRZ):
         return 0.0
@@ -360,6 +375,11 @@ def _get_damage_received(battle: Battle, action: tuple) -> float:
             if _is_confused(opp_mon):
                 damage *= 0.5
 
+            damage *= move.expected_hits
+
+            if move.id in GEN1_TRAPPING_MOVES:
+                damage *= EXPECTED_TRAP_TURNS
+
         max_damage = max(max_damage, damage)
 
     target_max_hp = target.max_hp if target.max_hp else 100
@@ -369,7 +389,7 @@ def _get_damage_received(battle: Battle, action: tuple) -> float:
         self_damage = _get_confusion_self_damage(my_mon)
         damage_fraction += 0.5 * self_damage / (my_mon.max_hp if my_mon.max_hp else 100)
 
-    return min(damage_fraction, 1.0)
+    return min(damage_fraction, target.current_hp_fraction)
 
 
 # ==================== Helper Functions ====================
@@ -549,4 +569,5 @@ def _create_default_move():
         category = type('Category', (), {'name': 'Physical'})()
         type = type('Type', (), {'name': 'Normal'})()
         base_power = 85
+        expected_hits = 1.0
     return DefaultMove()
