@@ -13,8 +13,8 @@ def analyze_battles():
     # Filter to only wins (actual_npw_score == 1.0) and keep the original index
     wins = df[df['actual_npw_score'] == 1.0].copy()
 
-    # Use the original row index as chronological position
-    wins['position'] = wins.index
+    # Each battle has exactly one winner, so sequential win count = battle number
+    wins['battle_number'] = range(1, len(wins) + 1)
 
     # Calculate cumulative wins for each method
     wins['cumulative_wins'] = wins.groupby('ml_method').cumcount() + 1
@@ -25,13 +25,13 @@ def analyze_battles():
     # Create the plot
     plt.figure(figsize=(12, 6))
 
-    plt.plot(knn_wins['position'], knn_wins['cumulative_wins'],
+    plt.plot(knn_wins['battle_number'], knn_wins['cumulative_wins'],
                 label='KNN', linewidth=2, marker='o', markersize=3)
 
-    plt.plot(gb_wins['position'], gb_wins['cumulative_wins'],
+    plt.plot(gb_wins['battle_number'], gb_wins['cumulative_wins'],
                 label='Gradient Boosting', linewidth=2, marker='s', markersize=3)
 
-    plt.xlabel('Battle Progression', fontsize=12)
+    plt.xlabel('Number of Battles', fontsize=12)
     plt.ylabel('Cumulative Wins', fontsize=12)
     plt.title('Cumulative Wins Over Time: KNN vs Gradient Boosting', fontsize=14, fontweight='bold')
     plt.legend(fontsize=11)
