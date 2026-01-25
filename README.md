@@ -13,6 +13,8 @@ This project takes a different approach: we hand-craft a small set of features t
 - `is_status_move` - status effect probability
 - `exp_damage_done` / `exp_damage_received` - expected damage exchange
 
+The target variable is also kept simple: each move is labeled with a discounted win score based on how many turns remained when the move was made. This sidesteps the credit assignment problem with a straightforward heuristic—later moves in winning games score higher—rather than implementing full reinforcement learning machinery.
+
 This low-dimensional approach lets us:
 - Train quickly with limited data
 - Compare classical ML methods (KNN, gradient boosting, etc.) directly
@@ -75,13 +77,13 @@ This runs battles in tmux, combining training data between rounds. It assumes yo
 
 Critical hit modeling (speed-based crit rates in Gen 1) is not implemented.
 
-I would like integration testing to be easier than just running a continuous battle for a while. We should test both training and self-driving modes automatically, with a repeatable seed, and have unit tests, especially for the engineered features.
+Better testing than just running battles for a while.
 
 I would also like to analyze what types of tactics the bots can learn from the condensed feature set, in addition to just tracking win rate for different models. I expect the bots to at least be able to learn that going for the KO when available is usually a good strategy, as well as avoiding known immediate KO risks. I expect GB to be able to learn this more quickly (see below).
 
-We should skip authentication for local battles.
+Skip authentication for local battles.
 
-We should make K in KNN more flexible and add distance-weighting options.
+Make K in KNN more flexible and add distance-weighting options.
 
 ## Ethics
 
