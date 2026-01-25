@@ -4,7 +4,7 @@ showdown_warrior is a framework for exploring how different machine learning met
 
 ## Motivation
 
-Pokemon battles have complex, high-dimensional state spaces. Traditional deep learning approaches would encode this full state, including perhaps history, and learn end-to-end.
+Pokemon battles have complex, high-dimensional state spaces. Traditional deep learning approaches would encode this full state, including history, and learn end-to-end.
 
 This project takes a different approach: we hand-craft a small set of features that capture the essence of a (gen 1) battle decision, intentionally leaving out subtleties, then compare how various ML methods learn from this compressed representation, and what bits of strategy they are able to pick up. The current feature set includes:
 
@@ -79,13 +79,17 @@ I would like integration testing to be easier than just running a continuous bat
 
 I would also like to analyze what types of tactics the bots can learn from the condensed feature set, in addition to just tracking win rate for different models. I expect the bots to at least be able to learn that going for the KO when available is usually a good strategy, as well as avoiding known immediate KO risks. I expect GB to be able to learn this more quickly (see below).
 
+We should skip authentication for local battles.
+
+We should make K in KNN more flexible and add distance-weighting options.
+
 ## Ethics
 
 This bot is intended for testing and research. Do not use it to challenge random players on the official Pokemon Showdown server. For large-scale training or continuous testing, host your own Showdown instance.
 
 ## Analysis
 
-The following graph shows cumulative wins over time for the KNN and Gradient Boosting methods over time, playing against each other. It suggests that GB might have gained a slight edge over KNN on the limited feature set, but more data is needed to conclude that it has truly pulled away.
+The following graph shows cumulative wins over time for the KNN and Gradient Boosting methods over time, playing against each other. It suggests that GB has gained an advantage over KNN on the limited feature set. Both bots have access to the same data (wins and losses) on each run, so this supports the idea that GB is better able to pull relevant information out of the data in this case.
 
 ![Cumulative Wins Over Time](./cumulative_wins.png)
 
