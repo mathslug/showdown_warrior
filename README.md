@@ -1,100 +1,79 @@
 # showdown_warrior
 
-showdown_warrior is a framework for exploring how different machine learning methods can learn to play Pokemon Showdown using a low-dimensional approximation of battle state.
+A framework for exploring what classical ML methods can learn about Pokemon battles from a deliberately simplified feature set.
 
 ## Motivation
 
-Pokemon battles have complex, high-dimensional state spaces. Traditional deep learning approaches would encode this full state, including history, and learn end-to-end.
+Pokemon battles have complex state spaces. Deep learning approaches typically encode full state and learn end-to-end. This project goes a difderent way: hand-craft a minimal feature set, directly apply classical ML, and see what strategy emerges.
 
-This project takes a different approach: we hand-craft a small set of features that capture the essence of a (gen 1) battle decision, intentionally leaving out subtleties, then compare how various ML methods learn from this compressed representation, and what bits of strategy they are able to pick up. The current feature set includes:
+**Features** (6 dimensions):
+- `self_hp` / `opp_hp` -- HP fractions
+- `outspeed_prob` -- probability of moving first
+- `is_status_move` -- whether the move applies status
+- `exp_damage_done` / `exp_damage_received` -- expected damage exchange
 
-- `self_hp` / `opp_hp` - HP fractions
-- `outspeed_prob` - probability of moving first
-- `is_status_move` - status effect probability
-- `exp_damage_done` / `exp_damage_received` - expected damage exchange
+**Target**: Each move is labeled with a discounted win score based on turns remaining. This sidesteps credit assignment with the simple heuristic that later moves in winning games score higher.
 
-The target variable is also kept simple: each move is labeled with a discounted win score based on how many turns remained when the move was made. This sidesteps the credit assignment problem with a straightforward heuristic—later moves in winning games score higher—rather than implementing full reinforcement learning machinery.
+**Hypothesis**: Even with this compressed representation, models should learn basic tactics: take KOs when available, avoid obvious KO risk, prefer favorable damage trades. Gradient boosting should pick this up faster than KNN given its ability to learn non-linear decision boundaries.
 
-This low-dimensional approach lets us:
-- Train quickly with limited data
-- Compare classical ML methods (KNN, gradient boosting, etc.) directly
-- Understand what the model is learning
+## Results
 
-In the future, this could be extended to methods that work in high dimensions, taking a more traditional deep learning approach with raw state encoding.
+KNN vs Gradient Boosting in self-play, both training on the same accumulated data:
 
-## Available ML Methods
+![Cumulative Wins Over Time](./cumulative_wins.png)
 
-- `knn` - K-Nearest Neighbors (default)
-- `gb` - Gradient Boosting
+GB pulls ahead, suggesting it extracts more from the limited feature set. Future work: analyze *what* tactics each method learns, not just win rate.
 
-Select via the `--method` flag.
+## ML Methods
+
+- `knn` — K-Nearest Neighbors (default)
+- `gb` — Gradient Boosting
+
+Select with `--method`.
 
 ## Setup
 
-1. Clone this repository and cd into it
-
-2. Save Showdown credentials in `./data/login.txt`:
+1. Save credentials in `./data/login.txt`:
    ```
    username
    password
    ```
 
-3. Install dependencies:
+2. Install and run:
    ```bash
    uv sync
-   ```
-
-4. Run the bot:
-   ```bash
    uv run python start_warrior.py
    ```
 
-## Continuous Training
+## Self-Play Training
 
-For self-play training that accumulates data across battles:
+Continuous battles with data accumulation:
 
 ```bash
-# Both bots use KNN (default)
-./continuous_battles.sh
-
-# Bot 1 uses gradient boosting, bot 2 uses KNN
-./continuous_battles.sh gb knn
+./continuous_battles.sh           # both use KNN
+./continuous_battles.sh gb knn    # GB vs KNN
 ```
 
-This runs battles in tmux, combining training data between rounds. It assumes you also have pokemon-showdown itself saved in the parent directory of this directory.
+Requires tmux and a local pokemon-showdown server in `../pokemon-showdown`.
 
 ## Project Structure
 
-- `start_warrior.py` - Entry point
-- `warrior_player.py` - Battle lifecycle and action selection
-- `thinkers/` - ML method implementations
-  - `feature_engineering.py` - Shared feature calculations
-  - `knn_thinker.py` - KNN implementation
-  - `gb_thinker.py` - Gradient boosting implementation
-- `continuous_battles.sh` - Self-play training script
+- `start_warrior.py` -- entry point
+- `warrior_player.py` -- battle logic and action selection
+- `thinkers/` -- ML implementations
+- `continuous_battles.sh` -- self-play loop
 
-## TODO
+## Future Work
 
-Critical hit modeling (speed-based crit rates in Gen 1) is not implemented.
-
-Better testing than just running battles for a while.
-
-I would also like to analyze what types of tactics the bots can learn from the condensed feature set, in addition to just tracking win rate for different models. I expect the bots to at least be able to learn that going for the KO when available is usually a good strategy, as well as avoiding known immediate KO risks. I expect GB to be able to learn this more quickly (see below).
-
-Skip authentication for local battles.
-
-Make K in KNN more flexible and add distance-weighting options.
+- Analyze learned tactics beyond win rate
+- Gen 1 critical hit modeling (speed-based crit rates)
+- Skip auth for local battles
+- Compare against deep RL with raw state encoding
 
 ## Ethics
 
-This bot is intended for testing and research. Do not use it to challenge random players on the official Pokemon Showdown server. For large-scale training or continuous testing, host your own Showdown instance.
-
-## Analysis
-
-The following graph shows cumulative wins over time for the KNN and Gradient Boosting methods over time, playing against each other. It suggests that GB has gained an advantage over KNN on the limited feature set. Both bots have access to the same data (wins and losses) on each run, so this supports the idea that GB is better able to pull relevant information out of the data in this case.
-
-![Cumulative Wins Over Time](./cumulative_wins.png)
+For research only. Don't use this to battle random players on official Showdown servers. Host your own instance for extensive training.
 
 ## License
 
-MIT License
+MIT
